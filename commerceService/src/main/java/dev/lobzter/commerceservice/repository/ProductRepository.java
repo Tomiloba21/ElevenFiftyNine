@@ -1,6 +1,7 @@
 package dev.lobzter.commerceservice.repository;
 
 import dev.lobzter.commerceservice.model.Product;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface ProductRepository extends MongoRepository<Product,String> {
+public interface ProductRepository extends MongoRepository<Product, ObjectId> {
     List<Product> findByNameContaining(String name);
     List<Product> findByCategoriesContaining(String category);
     List<Product> findByPriceLessThan(BigDecimal price);
