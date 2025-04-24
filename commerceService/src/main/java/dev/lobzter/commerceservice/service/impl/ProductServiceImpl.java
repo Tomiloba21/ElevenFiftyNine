@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -43,30 +42,76 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto.ProductResponse getProduct(ObjectId id) {
+    public ProductDto.ProductResponse getProduct(String id) {
         return productRepository.findById(id)
                 .map(this::mapToDto)
                 .orElseThrow(()-> new ProductExceptions("Product Not Found"));
     }
 
     @Override
-    public ProductDto.ProductResponse updateProduct(ObjectId id, ProductDto.ProductRequest newProductRequest) {
-        Product updatedProduct = productRepository.findById(id)
-                .map(existingProduct ->{
-                    existingProduct.setName(newProductRequest.getName());
-                    existingProduct.setDescription(newProductRequest.getDescription());
-                    existingProduct.setPrice(newProductRequest.getPrice());
-                    existingProduct.setStockQuantity(newProductRequest.getStockQuantity());
-                    existingProduct.setCategories(newProductRequest.getCategories());
-                    return productRepository.save(existingProduct);
-                })
+    public ProductDto.ProductResponse updateProduct(String id, ProductDto.ProductRequest newProductRequest) {
 
-                .orElseThrow(()-> new  ProductExceptions("Product not found with the id " + id));
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ProductExceptions("Product not found with the id " + id));
+
+
+        if (newProductRequest.getName() != null) {
+            existingProduct.setName(newProductRequest.getName());
+        }
+        if (newProductRequest.getDescription() != null) {
+            existingProduct.setDescription(newProductRequest.getDescription());
+        }
+        if (newProductRequest.getPrice() != null) {
+            existingProduct.setPrice(newProductRequest.getPrice());
+        }
+        if (newProductRequest.getStockQuantity() != 0) {
+            existingProduct.setStockQuantity(newProductRequest.getStockQuantity());
+        }
+        if (newProductRequest.getCategories() != null) {
+            existingProduct.setCategories(newProductRequest.getCategories());
+        }
+
+//        existingProduct.setName(newProductRequest.getName());
+//        existingProduct.setDescription(newProductRequest.getDescription());
+//        existingProduct.setPrice(newProductRequest.getPrice());
+//        existingProduct.setStockQuantity(newProductRequest.getStockQuantity());
+//        existingProduct.setCategories(newProductRequest.getCategories());
+
+        Product updatedProduct = productRepository.save(existingProduct);
+
+
         return mapToDto(updatedProduct);
     }
 
     @Override
-    public void deleteProduct(ObjectId id) {
+    public ProductDto.ProductResponse patchProduct(String id, ProductDto.ProductRequest patchRequest) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ProductExceptions("Product not found with the id " + id));
+
+        // Only update fields that are provided
+        if (patchRequest.getName() != null) {
+            existingProduct.setName(patchRequest.getName());
+        }
+        if (patchRequest.getCategories() != null) {
+            existingProduct.setName(patchRequest.getCategories().toString());
+        }
+        if (patchRequest.getPrice() != null){
+            existingProduct.setPrice(patchRequest.getPrice());
+        }
+        if (patchRequest.getDescription() != null){
+            existingProduct.setDescription(patchRequest.getDescription());
+        }
+        if (patchRequest.getCategories() != null){
+            existingProduct.setStockQuantity(patchRequest.getStockQuantity());
+        }
+        // Apply other fields similarly
+
+        Product updatedProduct = productRepository.save(existingProduct);
+        return mapToDto(updatedProduct);
+    }
+
+    @Override
+    public void deleteProduct(String id) {
 
         //TODO -> destructive add checker first in next version
         productRepository.deleteById(id);

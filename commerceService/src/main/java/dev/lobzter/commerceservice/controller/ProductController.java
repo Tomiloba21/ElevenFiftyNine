@@ -34,7 +34,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ProductDto.ProductResponse> getProductById(@PathVariable ObjectId id){
+    public ResponseEntity<ProductDto.ProductResponse> getProductById(@PathVariable String id){
         ProductDto.ProductResponse product = productService.getProduct(id);
         return ResponseEntity.status(HttpStatus.OK).body(product);
     }
@@ -48,17 +48,25 @@ public class ProductController {
     }
 
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<ProductDto.ProductResponse> updateProducts(@PathVariable ObjectId id, ProductDto.ProductRequest updatedRequest){
+    public ResponseEntity<ProductDto.ProductResponse> updateProducts(@PathVariable String id, ProductDto.ProductRequest updatedRequest){
 
         ProductDto.ProductResponse productResponse = productService.updateProduct(id, updatedRequest);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(productResponse);
     }
 
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<ProductDto.ProductResponse> PatchProducts(@PathVariable String id, ProductDto.ProductRequest updatedRequest){
+
+        ProductDto.ProductResponse productResponse = productService.patchProduct(id, updatedRequest);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productResponse);
+    }
+
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable ObjectId id){
+    public ResponseEntity<String> deleteProduct(@PathVariable String id){
         productService.deleteProduct(id);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Product Deleted");
     }

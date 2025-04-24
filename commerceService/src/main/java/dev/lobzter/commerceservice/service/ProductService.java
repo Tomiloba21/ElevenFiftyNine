@@ -13,9 +13,13 @@ public interface ProductService {
     ProductDto.ProductResponse createProduct(ProductDto.ProductRequest productRequest);
     Page<ProductDto.ProductResponse> getAllProducts(Pageable pageable);
 
-    ProductDto.ProductResponse getProduct(ObjectId id);
+    ProductDto.ProductResponse getProduct(String id);
 
-    ProductDto.ProductResponse updateProduct(ObjectId id, ProductDto.ProductRequest newProductRequest);
+    ProductDto.ProductResponse updateProduct(String  id, ProductDto.ProductRequest newProductRequest);
 
-    void deleteProduct(ObjectId id);
+
+    ProductDto.ProductResponse patchProduct(String id,ProductDto.ProductRequest patchRequest);
+
+
+    void deleteProduct(String  id);
 }

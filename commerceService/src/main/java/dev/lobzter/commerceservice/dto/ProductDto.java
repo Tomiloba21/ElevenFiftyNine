@@ -10,10 +10,13 @@ import org.springframework.data.annotation.Id;
 import java.math.BigDecimal;
 import java.util.Set;
 
+
+@Data
+@Builder
 public class ProductDto {
 
     @Id
-    private ObjectId id;
+    private String id;
     private String name;
     private String description;
     private BigDecimal price;
@@ -42,7 +45,7 @@ public class ProductDto {
     @NoArgsConstructor
     public static class ProductResponse {
 
-        private ObjectId id;
+        private String  id;
         private String name;
         private String description;
         private BigDecimal price;
