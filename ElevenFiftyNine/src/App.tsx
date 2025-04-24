@@ -1,12 +1,14 @@
-import HomePage from "./pages/HomePage"
 
+import ProductPage from "./pages/ProductPage"
+
+import './index.css'
 
 function App() {
 
 
   return (
     <>
-      <HomePage/>
+      <ProductPage/>
        
     </>
   )
