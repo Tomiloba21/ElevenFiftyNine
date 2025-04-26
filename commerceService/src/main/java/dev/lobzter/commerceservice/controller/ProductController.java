@@ -4,7 +4,6 @@ package dev.lobzter.commerceservice.controller;
 import dev.lobzter.commerceservice.dto.ProductDto;
 import dev.lobzter.commerceservice.service.impl.ProductServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

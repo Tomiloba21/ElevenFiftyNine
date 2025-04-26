@@ -1,21 +1,23 @@
-package dev.lobzter.commerceservice.model;
+package dev.lobzter.commerceservice.dto;
 
 
-import lombok.*;
+import dev.lobzter.commerceservice.model.Address;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-
 import java.util.List;
 
-@Document(value = "users")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class User {
+public class UserDto {
+
     @Id
     private String id;
 
@@ -40,9 +42,5 @@ public class User {
     private boolean accountNonExpired;
     private boolean credentialsNonExpired;
     private boolean accountNonLocked;
-
-
-
-
 
 }
