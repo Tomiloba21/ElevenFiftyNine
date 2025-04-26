@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { Nav } from '../components/Nav';
 
 export default function AddToCartPage() {
   // Theme toggle state
@@ -97,6 +98,7 @@ export default function AddToCartPage() {
   
   return (
     <div className={`${bgColor} ${textColor} min-h-screen`}>
+        <Nav />
       <div className="max-w-4xl mx-auto p-4">
 
 
