@@ -2,7 +2,7 @@
 import ProductPage from "./pages/ProductPage"
 
 import './index.css'
-import { BrowserRouter, Route, Routes } from "react-router"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import ProductsPage from "./pages/ProductsPage"
 import AuthPage from "./pages/AuthPage"
