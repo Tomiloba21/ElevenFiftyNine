@@ -130,9 +130,9 @@ export const Header: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute z-10 w-full bg-white border-t shadow-lg">
           <nav className="flex flex-col">
-            <a href="#" className="px-4 py-3 border-b hover:bg-gray-50">Shop</a>
-            <a href="#" className="px-4 py-3 border-b hover:bg-gray-50">New Arrivals</a>
-            <a href="#" className="px-4 py-3 border-b hover:bg-gray-50">Collections</a>
+            <a href="/cart" className="px-4 py-3 border-b hover:bg-gray-50">Shop</a>
+            <a href="auth" className="px-4 py-3 border-b hover:bg-gray-50">New Arrivals</a>
+            <a href="products" className="px-4 py-3 border-b hover:bg-gray-50">Collections</a>
             <a href="#" className="px-4 py-3 border-b hover:bg-gray-50">Sale</a>
             <a href="#" className="px-4 py-3 border-b hover:bg-gray-50 flex items-center">
               <Heart size={16} className="mr-2" />

@@ -3,7 +3,7 @@ import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 
 export default function AddToCartPage() {
   // Theme toggle state
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode] = useState(false);
   
   // Cart items state
   const [cartItems, setCartItems] = useState([
@@ -20,9 +20,9 @@ export default function AddToCartPage() {
   ]);
   
   // Theme toggle function
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+//   const toggleTheme = () => {
+//     setIsDarkMode(!isDarkMode);
+//   };
   
   // Define dynamic theme classes
   const bgColor = isDarkMode ? "bg-gray-900" : "bg-white";

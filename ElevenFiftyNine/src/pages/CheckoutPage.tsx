@@ -3,7 +3,7 @@ import { ChevronLeft, CreditCard, CheckCircle } from 'lucide-react';
 
 export default function CheckoutPage() {
   // Theme toggle state
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode] = useState(false);
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -37,9 +37,9 @@ export default function CheckoutPage() {
   };
   
   // Theme toggle function
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  // const toggleTheme = () => {
+  //   setIsDarkMode(!isDarkMode);
+  // };
   
   // Define dynamic theme classes
   const bgColor = isDarkMode ? "bg-gray-900" : "bg-white";

@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, User, Home, ChevronLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Home} from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { Nav } from '../components/Nav';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);

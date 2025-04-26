@@ -97,14 +97,14 @@ export default function ProductsPage() {
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
   
-  const categories = [
-    { id: 'all', name: 'All' },
-    { id: 'women', name: 'Women' },
-    { id: 'men', name: 'Men' },
-    { id: 'teens', name: 'Teens' },
-    { id: 'kids', name: 'Kids' },
-    { id: 'sports', name: 'Sports' }
-  ];
+//   const categories = [
+//     { id: 'all', name: 'All' },
+//     { id: 'women', name: 'Women' },
+//     { id: 'men', name: 'Men' },
+//     { id: 'teens', name: 'Teens' },
+//     { id: 'kids', name: 'Kids' },
+//     { id: 'sports', name: 'Sports' }
+//   ];
   
   const filters = [
     { id: 'all', name: 'All' },
