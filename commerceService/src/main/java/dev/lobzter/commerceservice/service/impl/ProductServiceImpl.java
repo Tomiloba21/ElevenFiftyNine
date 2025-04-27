@@ -6,7 +6,6 @@ import dev.lobzter.commerceservice.model.Product;
 import dev.lobzter.commerceservice.repository.ProductRepository;
 import dev.lobzter.commerceservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,10 +22,15 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto.ProductResponse createProduct(ProductDto.ProductRequest productRequest) {
         Product product = Product.builder()
                 .name(productRequest.getName())
+                .brand(productRequest.getBrand())
                 .description(productRequest.getDescription())
                 .price(productRequest.getPrice())
                 .stockQuantity(productRequest.getStockQuantity())
-                .categories(productRequest.getCategories())
+                .colors(productRequest.getColors())
+                .sizes(productRequest.getSizes())
+                .tags(productRequest.getTags())
+                .imageUrl(productRequest.getImageUrl())
+                .category(productRequest.getCategory())
                 .build();
 
         productRepository.save(product);
@@ -67,15 +71,9 @@ public class ProductServiceImpl implements ProductService {
         if (newProductRequest.getStockQuantity() != 0) {
             existingProduct.setStockQuantity(newProductRequest.getStockQuantity());
         }
-        if (newProductRequest.getCategories() != null) {
-            existingProduct.setCategories(newProductRequest.getCategories());
+        if (newProductRequest.getColors() != null) {
+            existingProduct.setColors(newProductRequest.getColors());
         }
-
-//        existingProduct.setName(newProductRequest.getName());
-//        existingProduct.setDescription(newProductRequest.getDescription());
-//        existingProduct.setPrice(newProductRequest.getPrice());
-//        existingProduct.setStockQuantity(newProductRequest.getStockQuantity());
-//        existingProduct.setCategories(newProductRequest.getCategories());
 
         Product updatedProduct = productRepository.save(existingProduct);
 
@@ -92,8 +90,8 @@ public class ProductServiceImpl implements ProductService {
         if (patchRequest.getName() != null) {
             existingProduct.setName(patchRequest.getName());
         }
-        if (patchRequest.getCategories() != null) {
-            existingProduct.setName(patchRequest.getCategories().toString());
+        if (patchRequest.getColors() != null) {
+            existingProduct.setName(patchRequest.getColors().toString());
         }
         if (patchRequest.getPrice() != null){
             existingProduct.setPrice(patchRequest.getPrice());
@@ -101,7 +99,7 @@ public class ProductServiceImpl implements ProductService {
         if (patchRequest.getDescription() != null){
             existingProduct.setDescription(patchRequest.getDescription());
         }
-        if (patchRequest.getCategories() != null){
+        if (patchRequest.getColors() != null){
             existingProduct.setStockQuantity(patchRequest.getStockQuantity());
         }
         // Apply other fields similarly
@@ -123,10 +121,19 @@ public class ProductServiceImpl implements ProductService {
         return ProductDto.ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
+                .brand(product.getBrand())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .discountPrice(product.getDiscountPrice())
                 .stockQuantity(product.getStockQuantity())
-                .categories(product.getCategories())
+                .colors(product.getColors())
+                .sizes(product.getSizes())
+                .category(product.getCategory())
+                .tags(product.getTags())
+                .imageUrl(product.getImageUrl())
+                .featured(product.isFeatured())
+                .reviewCount(product.getReviewCount())
+                .averageRating(product.getAverageRating())
                 .build();
 
     }

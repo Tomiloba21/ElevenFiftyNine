@@ -1,12 +1,8 @@
 package dev.lobzter.commerceservice.repository;
 
 import dev.lobzter.commerceservice.model.Product;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 
 @Repository

@@ -33,16 +33,24 @@ public class User {
 
     private List<String> roles;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime lastLogin;
+
+
+    // Add loyalty program fields
+    private int loyaltyPoints;
+    private String membershipTier; // Regular, Silver, Gold, etc.
+
+    // Add notification preferences
+    private boolean emailNotificationsEnabled;
+    private boolean smsNotificationsEnabled;
+
+    // Add wishlist
+    private List<String> wishlist; // Product IDs
 
     private boolean enabled;
     private boolean accountNonExpired;
     private boolean credentialsNonExpired;
     private boolean accountNonLocked;
-
-
-
-
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLogin;
 
 }

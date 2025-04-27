@@ -41,7 +41,7 @@ public class ProductController {
     @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
     public Page<ProductDto.ProductResponse> getAllProducts(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC
             ) Pageable pageable){
         return productService.getAllProducts(pageable);
     }

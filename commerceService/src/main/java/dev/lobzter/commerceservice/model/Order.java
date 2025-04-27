@@ -1,7 +1,9 @@
 package dev.lobzter.commerceservice.model;
 
 
+
 import dev.lobzter.commerceservice.model.enums.OrderStatus;
+import dev.lobzter.commerceservice.model.enums.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,6 +31,19 @@ public class Order {
     private LocalDateTime orderDate;
     private List<OrderItem> orderItems;
     private Address shippingAddress;
+
+
+
+    private String paymentId; // Reference to payment
+    private PaymentMethod paymentMethod;
+    private BigDecimal shippingCost;
+    private BigDecimal taxAmount;
+    private String trackingNumber;
+    private LocalDateTime shippedDate;
+    private LocalDateTime deliveredDate;
+    private String notes; // Customer or admin notes
+    private BigDecimal discountAmount; // From promotions
+    private String couponCode; // If used
 
 
     @Document(value = "orderItem")//remove
