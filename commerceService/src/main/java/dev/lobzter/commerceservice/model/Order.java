@@ -1,7 +1,9 @@
 package dev.lobzter.commerceservice.model;
 
 
+
 import dev.lobzter.commerceservice.model.enums.OrderStatus;
+import dev.lobzter.commerceservice.model.enums.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +12,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +33,21 @@ public class Order {
     private List<OrderItem> orderItems;
     private Address shippingAddress;
 
+    private BigDecimal subtotal;
+
+
+
+    private String paymentId; // Reference to payment
+    private PaymentMethod paymentMethod;
+    private BigDecimal shippingCost;
+    private BigDecimal taxAmount;
+    private String trackingNumber;
+    private LocalDateTime shippedDate;
+    private LocalDateTime deliveredDate;
+    private String notes; // Customer or admin notes
+    private BigDecimal discountAmount; // From promotions
+    private String couponCode; // If used
+
 
     @Document(value = "orderItem")//remove
     @AllArgsConstructor
@@ -43,6 +61,7 @@ public class Order {
         private String productName;
         private Integer quantity;
         private BigDecimal unitPrice;
+        private BigDecimal totalPrice;
 
         /**
          * Calculates subtotal for this order item
