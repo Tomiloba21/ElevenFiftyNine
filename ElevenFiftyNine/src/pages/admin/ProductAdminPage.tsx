@@ -16,7 +16,7 @@ import type { Product, ProductData } from '../../types/types';
 // Mock API functions - replace with actual API calls in production
 const fetchProducts = async (page = 0, size = 5): Promise<ProductData> => {
   try {
-    // Notice the trailing slash after "product/"
+    // todo => Notice the trailing slash after "product/ still need changed in the backend api "
     const response = await fetch(
       `http://localhost:8080/api/v1/product/?page=${page}&size=${size}&sort=createdAt,desc`
     );
