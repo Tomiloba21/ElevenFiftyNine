@@ -8,6 +8,7 @@ import ProductsPage from "./pages/ProductsPage"
 import AuthPage from "./pages/AuthPage"
 import AddToCartPage from "./pages/AddToCartPage"
 import CheckoutPage from "./pages/CheckoutPage"
+import ProductAdminPage from "./pages/admin/ProductAdminPage"
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
     <BrowserRouter>
 
     <Routes> 
+      <Route path="/admin/product" element={<ProductAdminPage />} />
       <Route path="/auth" element={<AuthPage />} />
        <Route path="/" element={<HomePage />} />
       <Route path="products" element={<ProductsPage/>} />
