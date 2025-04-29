@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping("${spring.data.rest.base-path}/product")
 @RequiredArgsConstructor
