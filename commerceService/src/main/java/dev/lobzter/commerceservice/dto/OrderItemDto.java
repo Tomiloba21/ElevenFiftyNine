@@ -17,6 +17,7 @@ public class OrderItemDto {
     private String productName;
     private Integer quantity;
     private BigDecimal unitPrice;
+    private BigDecimal totalPrice;
     private String color;
     private String size;
 

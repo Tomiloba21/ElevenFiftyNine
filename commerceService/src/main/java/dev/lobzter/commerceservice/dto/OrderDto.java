@@ -21,6 +21,7 @@ public class OrderDto {
     private String orderNumber;
     private String customerId;
     private OrderStatus status;
+    private BigDecimal subtotal;
     private BigDecimal totalAmount;
     private LocalDateTime orderDate;
     private List<OrderItemDto> orderItems;

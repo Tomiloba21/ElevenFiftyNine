@@ -12,6 +12,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,6 +32,8 @@ public class Order {
     private LocalDateTime orderDate;
     private List<OrderItem> orderItems;
     private Address shippingAddress;
+
+    private BigDecimal subtotal;
 
 
 
@@ -58,6 +61,7 @@ public class Order {
         private String productName;
         private Integer quantity;
         private BigDecimal unitPrice;
+        private BigDecimal totalPrice;
 
         /**
          * Calculates subtotal for this order item
