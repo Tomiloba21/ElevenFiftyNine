@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("${spring.data.rest.base-path}/product")
+@RequestMapping("api/v1/product")
 @RequiredArgsConstructor
 public class ProductController {
 

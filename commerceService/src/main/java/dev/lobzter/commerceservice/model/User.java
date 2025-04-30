@@ -1,6 +1,7 @@
 package dev.lobzter.commerceservice.model;
 
 
+import dev.lobzter.commerceservice.model.enums.UserRole;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -31,7 +32,7 @@ public class User {
 
     private List<Address> addresses;
 
-    private List<String> roles;
+    private List<UserRole> roles;
 
 
 
