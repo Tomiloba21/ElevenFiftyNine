@@ -2,6 +2,7 @@ package dev.lobzter.commerceservice.dto;
 
 
 import dev.lobzter.commerceservice.model.Address;
+import dev.lobzter.commerceservice.model.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -23,7 +24,7 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private List<Address> addresses;
-    private List<String> roles;
+    private List<UserRole> roles;
     private boolean enabled;
     private int loyaltyPoints;
     private String membershipTier;
@@ -59,7 +60,7 @@ public class UserDto {
         private String firstName;
         private String lastName;
         private List<Address> addresses;
-        private List<String> roles;
+        private List<UserRole> roles;
         private LocalDateTime createdAt;
         private LocalDateTime lastLogin;
     }
