@@ -4,6 +4,7 @@ import { ProductInfo } from '../components/Products/ProductInfo';
 import { Reviews } from '../components/Products/Review';
 import tshirtImage from "../assets/images/redShirt.png";
 import { Footer } from '../components/Footer';
+import { Nav } from '../components/Nav';
 
 const ProductPage: React.FC = () => {
   // Sample data
@@ -52,7 +53,7 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="w-full bg-white">
-      <Header />
+     <Nav />
       {/* Main content - full width with white background */}
       <div className="w-full bg-white">
         {/* Content container with responsive padding */}

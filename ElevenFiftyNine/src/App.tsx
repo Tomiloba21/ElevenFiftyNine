@@ -9,6 +9,8 @@ import AuthPage from "./pages/AuthPage"
 import AddToCartPage from "./pages/AddToCartPage"
 import CheckoutPage from "./pages/CheckoutPage"
 import ProductAdminPage from "./pages/admin/ProductAdminPage"
+import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import { UserManagementPage } from "./pages/UserManagement"
 
 function App() {
 
@@ -19,7 +21,9 @@ function App() {
 
     <Routes> 
       <Route path="/admin/product" element={<ProductAdminPage />} />
+      <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/account" element={<UserManagementPage />} />
        <Route path="/" element={<HomePage />} />
       <Route path="products" element={<ProductsPage/>} />
       <Route path="/cart" element={<AddToCartPage />} />

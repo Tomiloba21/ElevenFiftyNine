@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, Loader2 } from 'lucide-react';
 import { Nav } from '../components/Nav';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function AddToCartPage() {
   // Theme toggle state
   const [isDarkMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   
   // Cart items state
   const [cartItems, setCartItems] = useState([
@@ -180,9 +184,27 @@ export default function AddToCartPage() {
                 <p className={textColor}>${(parseFloat(calculateSubtotal()) + 5.99 + 3.60).toFixed(2)}</p>
               </div>
               
-              <button className={`w-full ${buttonBgColor} text-white py-3 rounded mt-4 flex items-center justify-center`}>
-                <ShoppingCart size={18} className="mr-2" />
-                Proceed to Checkout
+              <button
+                  onClick={() => {
+                    setIsLoading(true);
+                    navigate('/checkout');
+                  }}
+                  disabled={isLoading}
+                  className={`w-full ${buttonBgColor} text-white py-3 rounded mt-4 flex items-center justify-center hover:bg-blue-700 transition-colors ${
+                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <Loader2 size={18} className="mr-2 animate-spin" />
+                      Processing...
+                    </span>
+                  ) : (
+                    <>
+                      <ShoppingCart size={18} className="mr-2" />
+                      Proceed to Checkout
+                    </>
+                  )}
               </button>
               
               <p className={`text-center mt-4 text-sm ${secondaryTextColor}`}>

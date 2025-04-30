@@ -1,60 +1,123 @@
-import { ShoppingCart, Heart, User, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Search, User, Menu, X } from 'lucide-react';
 
 export const Nav = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // This is where you would check if user is logged in
+  // For example, you might check localStorage or a global state
+  useEffect(() => {
+    // Example: Check if user token exists in localStorage
+    const userToken = localStorage.getItem('userToken');
+    setIsLoggedIn(!!userToken);
+  }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user && !!JSON.parse(user).accessToken);
+  }, []);
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="text-xl sm:text-2xl font-bold text-stone-700">Eleven Fifty Nine</div>
-        <div className="flex items-center space-x-6">
-          <nav className="hidden md:flex space-x-6 text-gray-600">
-            {['Women', 'Men', 'Sports', 'Brands'].map((item) => (
-              <a key={item} href="#" className="hover:text-black">
-                {item}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-600 hover:text-black">
-              <Heart size={20} />
+    <nav className="bg-white shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link to="/" className="text-xl font-bold text-gray-800">
+              ElevenFiftyNine
+            </Link>
+          </div>
+          
+          {/* Navigation - Desktop */}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            <Link to="/" className="text-gray-600 hover:text-gray-900">
+              Home
+            </Link>
+            <Link to="/products" className="text-gray-600 hover:text-gray-900">
+              Products
+            </Link>
+            <Link to="/about" className="text-gray-600 hover:text-gray-900">
+              About
+            </Link>
+            <Link to="/contact" className="text-gray-600 hover:text-gray-900">
+              Contact
+            </Link>
+          </div>
+          
+          {/* Actions */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            <button className="text-gray-600 hover:text-gray-900 p-1">
+              <Search size={20} />
             </button>
-            <button className="text-gray-600 hover:text-black">
+            <Link to="/cart" className="text-gray-600 hover:text-gray-900 p-1 relative">
               <ShoppingCart size={20} />
-            </button>
-            <button className="text-gray-600 hover:text-black">
-              <User size={20} />
-            </button>
+              <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                3
+              </span>
+            </Link>
+            {isLoggedIn ? (
+              <Link to="/account" className="text-gray-600 hover:text-gray-900 p-1">
+                <User size={20} />
+              </Link>
+            ) : (
+              <Link to="/auth" className="text-gray-600 hover:text-gray-900 p-1">
+                <User size={20} />
+              </Link>
+            )}
+          </div>
+          
+          {/* Mobile menu button */}
+          <div className="flex md:hidden items-center">
             <button 
-              className="md:hidden text-gray-600 hover:text-black"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
+              className="text-gray-600 hover:text-gray-900 p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 shadow-md">
-          <div className="max-w-7xl mx-auto px-4 py-2">
-            <nav className="flex flex-col space-y-3 py-3">
-              {['Women', 'Men', 'Sports', 'Brands'].map((item) => (
-                <a key={item} href="#" className="text-gray-600 hover:text-black py-1">
-                  {item}
-                </a>
-              ))}
-            </nav>
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white pt-2 pb-4 px-4 border-t">
+          <div className="flex flex-col space-y-2">
+            <Link to="/" className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md">
+              Home
+            </Link>
+            <Link to="/products" className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md">
+              Products
+            </Link>
+            <Link to="/about" className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md">
+              About
+            </Link>
+            <Link to="/contact" className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md">
+              Contact
+            </Link>
+            <div className="border-t pt-2 mt-2 flex justify-around">
+              <button className="text-gray-600 hover:text-gray-900 p-1">
+                <Search size={20} />
+              </button>
+              <Link to="/cart" className="text-gray-600 hover:text-gray-900 p-1 relative">
+                <ShoppingCart size={20} />
+                <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  3
+                </span>
+              </Link>
+              {isLoggedIn ? (
+                <Link to="/account" className="text-gray-600 hover:text-gray-900 p-1">
+                  <User size={20} />
+                </Link>
+              ) : (
+                <Link to="/login" className="text-gray-600 hover:text-gray-900 p-1">
+                  <User size={20} />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}
     </nav>
   );
-}
+};
