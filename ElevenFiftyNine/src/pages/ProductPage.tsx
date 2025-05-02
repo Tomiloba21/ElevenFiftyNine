@@ -1,9 +1,9 @@
-import { Header } from '../components/Products/Header';
 import { ProductGallery } from '../components/Products/ProductGallery';
 import { ProductInfo } from '../components/Products/ProductInfo';
 import { Reviews } from '../components/Products/Review';
 import tshirtImage from "../assets/images/redShirt.png";
 import { Footer } from '../components/Footer';
+import { Nav } from '../components/Nav';
 
 const ProductPage: React.FC = () => {
   // Sample data
@@ -52,8 +52,8 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="w-full bg-white">
-      <Header />
-      {/* Main content - full width with white background */}
+     <Nav />
+      {/* Main content - full width with whiteee background */}
       <div className="w-full bg-white">
         {/* Content container with responsive padding */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,7 +61,7 @@ const ProductPage: React.FC = () => {
           <div className="py-6 lg:py-8 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
             {/* Gallery container with better mobile spacing */}
             <div className="bg-gray-100 p-4 sm:p-6 rounded-lg">
-              <ProductGallery
+              <ProductGallery 
                 mainImage={tshirtImage}
                 thumbnails={thumbnails}
               />
