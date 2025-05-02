@@ -1,6 +1,7 @@
 package dev.lobzter.commerceservice.dto;
 
 import dev.lobzter.commerceservice.model.Address;
+import dev.lobzter.commerceservice.model.User;
 import dev.lobzter.commerceservice.model.enums.OrderStatus;
 import dev.lobzter.commerceservice.model.enums.PaymentMethod;
 import jakarta.validation.constraints.NotEmpty;
@@ -38,6 +39,9 @@ public class OrderDto {
         @NotNull(message = "Shipping address is required")
         private Address shippingAddress;
 
+        @NotNull(message = "Customer ID is required")
+        private String customerId;
+
         private String paymentMethod;
         private String couponCode;
     }
@@ -49,6 +53,7 @@ public class OrderDto {
     public static class OrderResponse {
         private String id;
         private String orderNumber;
+        private String customerId;
         private OrderStatus status;
         private BigDecimal subtotal;
         private BigDecimal shippingCost;

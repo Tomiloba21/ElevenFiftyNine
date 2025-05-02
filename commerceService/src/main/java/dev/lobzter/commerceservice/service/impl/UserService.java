@@ -3,6 +3,7 @@ package dev.lobzter.commerceservice.service.impl;
 
 
 import dev.lobzter.commerceservice.dto.UserDto;
+import dev.lobzter.commerceservice.model.Address;
 import dev.lobzter.commerceservice.model.PasswordResetToken;
 import dev.lobzter.commerceservice.model.User;
 import dev.lobzter.commerceservice.model.enums.UserRole;
@@ -43,6 +44,8 @@ public class UserService {
     }
 
     public User createUser(UserDto.UserRequest userRequest) {
+
+
         User user = User.builder()
                 .username(userRequest.getUsername())
                 .email(userRequest.getEmail())
@@ -55,7 +58,7 @@ public class UserService {
                 .credentialsNonExpired(true)
                 .accountNonLocked(true)
                 .createdAt(LocalDateTime.now())
-                .addresses(new ArrayList<>())
+                .addresses(userRequest.getAddress())
                 .loyaltyPoints(0)
                 .membershipTier("Regular")
                 .emailNotificationsEnabled(true)

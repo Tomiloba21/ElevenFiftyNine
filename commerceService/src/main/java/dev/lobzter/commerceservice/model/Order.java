@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
@@ -26,7 +28,10 @@ public class Order {
     @Id
     private String id;
     private String orderNumber;
-    private String customerId;
+
+//    @DBRef
+//    @Indexed(unique = true, sparse = true)
+    private String  customerId;
     private OrderStatus status;
     private BigDecimal totalAmount;
     private LocalDateTime orderDate;
