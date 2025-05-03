@@ -71,6 +71,8 @@ public class SecurityConfig {
                                 basePath + "/public/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
+                                "/error",
+                                "/api/v1/images/**",
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers(basePath + "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
