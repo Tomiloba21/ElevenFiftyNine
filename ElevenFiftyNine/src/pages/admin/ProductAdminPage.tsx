@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Trash2, 
   Edit, 
@@ -9,82 +9,28 @@ import {
   X, 
   Save, 
   Tag,
-
+  Upload
 } from 'lucide-react';
-import type { Product, ProductData } from '../../types/types';
-
-// Mock API functions - replace with actual API calls in production
-const fetchProducts = async (page = 0, size = 5): Promise<ProductData> => {
-  try {
-    // todo => Notice the trailing slash after "product/ still need changed in the backend api "
-    const response = await fetch(
-      `http://localhost:8080/api/v1/product/?page=${page}&size=${size}&sort=createdAt,desc`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return {
-      content: [],
-      page: {
-        size: size,
-        number: page,
-        totalElements: 0,
-        totalPages: 0
-      }
-    };
-  }
-};
-
-const deleteProduct = async (id: string): Promise<boolean> => {
-  // In real app, delete via API
-  try {
-    const response = await fetch(`/api/admin/products/${id}`, {
-      method: 'DELETE',
-    });
-    return response.ok;
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    return false;
-  }
-};
-
-const saveProduct = async (product: Product): Promise<Product | null> => {
-  // In real app, save via API
-  const isUpdate = !!product.id;
-  try {
-    const response = await fetch(`/api/admin/products${isUpdate ? `/${product.id}` : ''}`, {
-      method: isUpdate ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(product),
-    });
-    if (response.ok) {
-      return await response.json();
-    }
-    return null;
-  } catch (error) {
-    console.error(`Error ${isUpdate ? 'updating' : 'creating'} product:`, error);
-    return null;
-  }
-};
-
+import type { Product } from '../../types/types';
+import { useNavigate } from 'react-router-dom';
+import { ProductApi } from '../../context/ProductApi';
+  
 export default function ProductAdminPage() {
   // State variables
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const API_BASE_URL = 'http://localhost:8080/api/v1/product';
 
   // Initial empty product template
   const emptyProduct: Product = {
@@ -99,70 +45,206 @@ export default function ProductAdminPage() {
     sizes: [],
     category: '',
     tags: [],
-    imageUrl: '/api/placeholder/300/300',
+    imageUrl: '',
     featured: false,
     reviewCount: 0,
     averageRating: 0
   };
 
-  // Load products
+  const navigate = useNavigate();
+  
+  // Check authentication on component mount
   useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchProducts(currentPage);
-        setProducts(data.content);
-        setTotalPages(data.page.totalPages);
-      } catch (error) {
-        console.error('Failed to load products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    const userToken = localStorage.getItem('userToken');
+    
+    if (!userToken) {
+      navigate('/auth');
+      return;
+    }
+    
     loadProducts();
+  }, [navigate]);
+
+  // Load products using ProductApi
+  const loadProducts = async () => {
+    setLoading(true);
+    setAuthError(null);
+    
+    try {
+      const data = await ProductApi.fetchProducts(currentPage);
+      setProducts(data.content);
+      setTotalPages(data.page.totalPages);
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      
+      if (error instanceof Error && error.message.includes('401')) {
+        setAuthError('Authentication failed. Please log in again.');
+        localStorage.removeItem('userToken');
+        navigate('/auth');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Effect to reload products when page changes
+  useEffect(() => {
+    if (localStorage.getItem('userToken')) {
+      loadProducts();
+    }
   }, [currentPage]);
 
   // Handle search
   const handleSearch = async () => {
     setLoading(true);
     try {
-      // In real app, add search parameters to API call
-      const data = await fetchProducts(1);
+      const data = await ProductApi.fetchProducts(0);
       setProducts(data.content.filter(product => 
         product.name.toLowerCase().includes(search.toLowerCase()) ||
         product.brand.toLowerCase().includes(search.toLowerCase())
       ));
-      setCurrentPage(1);
+      setCurrentPage(0);
     } catch (error) {
       console.error('Search failed:', error);
+      
+      if (error instanceof Error && error.message.includes('401')) {
+        localStorage.removeItem('userToken');
+        navigate('/auth');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Open modal for creating/editing
-  const openModal = (product: Product | null = null) => {
-    setEditingProduct(product || {...emptyProduct, id: `temp-${Date.now()}`});
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  // Handle delete
+  // Handle delete using ProductApi
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      setLoading(true);
-      const success = await deleteProduct(id);
-      if (success) {
-        setProducts(products.filter(p => p.id !== id));
-      } else {
-        alert('Failed to delete product');
+      // Optimistically update UI
+      const originalProducts = [...products];
+      setProducts(products.filter(p => p.id !== id));
+      
+      try {
+        await ProductApi.deleteProduct(id);
+        // Refresh from server to confirm
+        await loadProducts();
+      } catch (error) {
+        // Revert on error
+        setProducts(originalProducts);
+        console.error('Delete failed:', error);
+        alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+    }
+  };
+
+  // Handle image selection
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
+  // Reset image selection
+  const resetImageSelection = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
+  const getAuthHeaders = () => {
+    const userToken = localStorage.getItem('userToken');
+    if (!userToken) {
+      throw new Error('401: Unauthorized - No token found');
+    }
+    return {
+      'Authorization': `Bearer ${userToken}`,
+    };
+  };
+
+  // Handle save for both create and update
+  const handleSave = async () => {
+    if (!editingProduct) return;
+    
+    if (!validateForm(editingProduct)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const isNewProduct = editingProduct.id.startsWith('temp-');
+      let savedProduct: Product;
+      
+      if (selectedImage) {
+        if (isNewProduct) {
+          // First create product without image
+          const productWithoutImage = { ...editingProduct };
+          delete productWithoutImage.imageUrl; // Remove any placeholder
+          
+          // Create the product first
+          savedProduct = await ProductApi.saveProduct(productWithoutImage);
+          
+          // Then upload the image separately
+          savedProduct = await ProductApi.uploadProductImage(savedProduct.id, selectedImage);
+        } else {
+          // For existing product with new image
+          // Create a FormData object
+          const formData = new FormData();
+          
+          // Add product data as JSON
+          const productBlob = new Blob([JSON.stringify(editingProduct)], {
+            type: 'application/json'
+          });
+          formData.append('product', productBlob);
+          
+          // Add image
+          formData.append('image', selectedImage);
+          
+          // Send the request
+          const response = await fetch(`${API_BASE_URL}/${editingProduct.id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to update product: ${response.statusText}`);
+          }
+          
+          savedProduct = await response.json();
+        }
+      } else {
+        // No image to upload, just save the product data
+        savedProduct = await ProductApi.saveProduct(editingProduct);
+      }
+
+      // Update UI
+      if (isNewProduct) {
+        setProducts([...products, savedProduct]);
+      } else {
+        setProducts(products.map(p => p.id === savedProduct.id ? savedProduct : p));
+      }
+
+      resetImageSelection();
+      setIsModalOpen(false);
+      
+      // Reload products to ensure UI is in sync with backend
+      await loadProducts();
+    } catch (error) {
+      console.error('Save failed:', error);
+      alert(`Save failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
       setLoading(false);
     }
   };
 
-  // Form validation
   const validateForm = (product: Product): boolean => {
     const errors: Record<string, string> = {};
     
@@ -178,33 +260,6 @@ export default function ProductAdminPage() {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
-
-  // Handle save
-  const handleSave = async () => {
-    if (!editingProduct) return;
-    
-    if (!validateForm(editingProduct)) {
-      return;
-    }
-
-    setLoading(true);
-    const savedProduct = await saveProduct(editingProduct);
-    
-    if (savedProduct) {
-      // Update product list
-      if (editingProduct.id.startsWith('temp-')) {
-        // New product
-        setProducts([...products, savedProduct]);
-      } else {
-        // Updated product
-        setProducts(products.map(p => p.id === savedProduct.id ? savedProduct : p));
-      }
-      setIsModalOpen(false);
-    } else {
-      alert('Failed to save product');
-    }
-    setLoading(false);
   };
 
   // Handle field changes
@@ -239,6 +294,38 @@ export default function ProductAdminPage() {
     
     handleFieldChange(field, newArray);
   };
+
+  // Open modal for creating/editing
+  const openModal = (product: Product | null = null) => {
+    resetImageSelection();
+    setEditingProduct(product || {...emptyProduct, id: `temp-${Date.now()}`});
+    
+    // If editing an existing product with an imageUrl, set it as the preview
+    if (product && product.imageUrl) {
+      setImagePreview(product.imageUrl);
+    }
+    
+    setFormErrors({});
+    setIsModalOpen(true);
+  };
+
+  // Show auth error if present
+  if (authError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h2>
+          <p className="text-gray-700 mb-6">{authError}</p>
+          <button 
+            onClick={() => navigate('/auth')}
+            className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -333,7 +420,7 @@ export default function ProductAdminPage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           <img 
                             className="h-10 w-10 rounded object-cover" 
-                            src={product.imageUrl} 
+                            src={product.imageUrl || '/api/placeholder/300/300'} 
                             alt={product.name} 
                           />
                         </div>
@@ -395,10 +482,10 @@ export default function ProductAdminPage() {
             <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                  disabled={currentPage === 0}
                   className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                    currentPage === 1 
+                    currentPage === 0 
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                       : 'bg-white text-gray-700 hover:bg-gray-50'
                   }`}
@@ -406,10 +493,10 @@ export default function ProductAdminPage() {
                   Previous
                 </button>
                 <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                  disabled={currentPage === totalPages - 1}
                   className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                    currentPage === totalPages 
+                    currentPage === totalPages - 1 
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                       : 'bg-white text-gray-700 hover:bg-gray-50'
                   }`}
@@ -420,17 +507,17 @@ export default function ProductAdminPage() {
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing page <span className="font-medium">{currentPage}</span> of{' '}
+                    Showing page <span className="font-medium">{currentPage + 1}</span> of{' '}
                     <span className="font-medium">{totalPages}</span>
                   </p>
                 </div>
                 <div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                      disabled={currentPage === 0}
                       className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                        currentPage === 1 
+                        currentPage === 0 
                           ? 'text-gray-300 cursor-not-allowed' 
                           : 'text-gray-500 hover:bg-gray-50'
                       }`}
@@ -443,11 +530,11 @@ export default function ProductAdminPage() {
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNumber;
                       if (totalPages <= 5) {
-                        pageNumber = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNumber = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + i;
+                        pageNumber = i;
+                      } else if (currentPage <= 2) {
+                        pageNumber = i;
+                      } else if (currentPage >= totalPages - 3) {
+                        pageNumber = totalPages - 5 + i;
                       } else {
                         pageNumber = currentPage - 2 + i;
                       }
@@ -462,16 +549,16 @@ export default function ProductAdminPage() {
                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                           }`}
                         >
-                          {pageNumber}
+                          {pageNumber + 1}
                         </button>
                       );
                     })}
                     
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                      disabled={currentPage === totalPages - 1}
                       className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                        currentPage === totalPages 
+                        currentPage === totalPages - 1 
                           ? 'text-gray-300 cursor-not-allowed' 
                           : 'text-gray-500 hover:bg-gray-50'
                       }`}
@@ -615,273 +702,297 @@ export default function ProductAdminPage() {
                     )}
                   </div>
                   
-                  <div className="mb-4">
+                  {/* Image Upload Section */}
+                  <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Image URL
+                      Product Image
                     </label>
-                    <input
-                      type="text"
-                      value={editingProduct.imageUrl}
-                      onChange={(e) => handleFieldChange('imageUrl', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Enter a URL or use "/api/placeholder/300/300" for a placeholder
-                    </p>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="featured"
-                        checked={editingProduct.featured}
-                        onChange={(e) => handleFieldChange('featured', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
-                        Featured Product
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Right Column */}
-                <div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={editingProduct.category}
-                      onChange={(e) => handleFieldChange('category', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        formErrors.category ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    >
-                      <option value="">Select a category</option>
-                      <option value="men">Men</option>
-                      <option value="women">Women</option>
-                      <option value="kids">Kids</option>
-                      <option value="sports">Sports</option>
-                      <option value="accessories">Accessories</option>
-                    </select>
-                    {formErrors.category && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.category}</p>
-                    )}
-                  </div>
-                  
-                  {/* Colors */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Colors
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {editingProduct.colors.map((color) => (
-                        <div 
-                          key={color}
-                          className="flex items-center bg-gray-100 px-3 py-1 rounded"
-                        >
-                          <div 
-                            className="w-3 h-3 rounded-full mr-2" 
-                            style={{ backgroundColor: color }}
-                          />
-                          <span className="text-sm text-gray-800">{color}</span>
-                          <button 
-                            onClick={() => handleArrayFieldChange('colors', 'remove', color)}
-                            className="ml-2 text-gray-500 hover:text-red-500"
+                    
+                    {/* Image preview */}
+                    {imagePreview && (
+                      <div className="mb-4 relative">
+                        <img 
+                          src={imagePreview} 
+                          alt="Product preview" 
+                          className="w-full h-48 object-contain border rounded bg-gray-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetImageSelection();
+                            // Only clear the imageUrl if it's a new product or if a file was selected
+                            if (editingProduct.id.startsWith('temp-') || selectedImage) {
+                              handleFieldChange('imageUrl', '');
+                            }
+                          }}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
                           >
-                            <X size={14} />
+                            <X size={16} />
                           </button>
                         </div>
-                      ))}
+                      )}
+                      
+                      {/* File input */}
+                      <div className="flex items-center">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleImageSelect}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-l flex items-center"
+                        >
+                          <Upload size={16} className="mr-1" /> Choose File
+                        </button>
+                        <div className="px-4 py-2 bg-gray-50 border-t border-b border-r border-gray-300 text-sm text-gray-500 flex-grow truncate">
+                          {selectedImage ? selectedImage.name : "No file selected"}
+                        </div>
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">
+                        JPG, PNG or GIF (Max 5MB)
+                      </p>
                     </div>
-                    <div className="flex">
-                      <input
-                        type="text"
-                        id="colorInput"
-                        placeholder="Add a color (e.g., red, #FF0000)"
-                        className={`flex-grow px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          formErrors.colors ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            const input = e.target as HTMLInputElement;
+                  </div>
+                  
+                  {/* Right Column */}
+                  <div>
+                    {/* Colors */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Colors
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {editingProduct.colors.map((color) => (
+                          <span 
+                            key={color} 
+                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                          >
+                            {color}
+                            <button
+                              type="button"
+                              onClick={() => handleArrayFieldChange('colors', 'remove', color)}
+                              className="ml-1 text-blue-600 hover:text-blue-900"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="text"
+                          id="newColor"
+                          placeholder="Add color"
+                          className="flex-grow px-3 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                              handleArrayFieldChange('colors', 'add', e.currentTarget.value.trim());
+                              e.currentTarget.value = '';
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById('newColor') as HTMLInputElement;
                             if (input.value.trim()) {
                               handleArrayFieldChange('colors', 'add', input.value.trim());
                               input.value = '';
                             }
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          const input = document.getElementById('colorInput') as HTMLInputElement;
-                          if (input.value.trim()) {
-                            handleArrayFieldChange('colors', 'add', input.value.trim());
-                            input.value = '';
-                          }
-                        }}
-                        className="bg-blue-600 text-white px-3 py-2 rounded-r hover:bg-blue-700"
-                      >
-                        <Plus size={16} />
-                      </button>
-                      </div>
-                    {formErrors.colors && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.colors}</p>
-                    )}
-                  </div>
-
-                  {/* Sizes */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sizes
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {editingProduct.sizes.map((size) => (
-                        <div 
-                          key={size}
-                          className="flex items-center bg-gray-100 px-3 py-1 rounded"
+                          }}
+                          className="bg-blue-600 text-white px-3 py-2 rounded-r hover:bg-blue-700"
                         >
-                          <span className="text-sm text-gray-800">{size}</span>
-                          <button 
-                            onClick={() => handleArrayFieldChange('sizes', 'remove', size)}
-                            className="ml-2 text-gray-500 hover:text-red-500"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))}
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      {formErrors.colors && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.colors}</p>
+                      )}
                     </div>
-                    <div className="flex">
-                      <input
-                        type="text"
-                        id="sizeInput"
-                        placeholder="Add a size (e.g., S, M, L)"
-                        className={`flex-grow px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          formErrors.sizes ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            const input = e.target as HTMLInputElement;
+                    
+                    {/* Sizes */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sizes
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {editingProduct.sizes.map((size) => (
+                          <span 
+                            key={size} 
+                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800"
+                          >
+                            {size}
+                            <button
+                              type="button"
+                              onClick={() => handleArrayFieldChange('sizes', 'remove', size)}
+                              className="ml-1 text-green-600 hover:text-green-900"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="text"
+                          id="newSize"
+                          placeholder="Add size"
+                          className="flex-grow px-3 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                              handleArrayFieldChange('sizes', 'add', e.currentTarget.value.trim());
+                              e.currentTarget.value = '';
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById('newSize') as HTMLInputElement;
                             if (input.value.trim()) {
                               handleArrayFieldChange('sizes', 'add', input.value.trim());
                               input.value = '';
                             }
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          const input = document.getElementById('sizeInput') as HTMLInputElement;
-                          if (input.value.trim()) {
-                            handleArrayFieldChange('sizes', 'add', input.value.trim());
-                            input.value = '';
-                          }
-                        }}
-                        className="bg-blue-600 text-white px-3 py-2 rounded-r hover:bg-blue-700"
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                    {formErrors.sizes && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.sizes}</p>
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tags
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {editingProduct.tags.map((tag) => (
-                        <div 
-                          key={tag}
-                          className="flex items-center bg-gray-100 px-3 py-1 rounded"
+                          }}
+                          className="bg-blue-600 text-white px-3 py-2 rounded-r hover:bg-blue-700"
                         >
-                          <Tag size={14} className="mr-1 text-gray-500" />
-                          <span className="text-sm text-gray-800">{tag}</span>
-                          <button 
-                            onClick={() => handleArrayFieldChange('tags', 'remove', tag)}
-                            className="ml-2 text-gray-500 hover:text-red-500"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))}
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      {formErrors.sizes && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.sizes}</p>
+                      )}
                     </div>
-                    <div className="flex">
+                    
+                    {/* Category */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                      </label>
                       <input
                         type="text"
-                        id="tagInput"
-                        placeholder="Add a tag (e.g., summer, new)"
-                        className={`flex-grow px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          formErrors.tags ? 'border-red-500' : 'border-gray-300'
+                        value={editingProduct.category}
+                        onChange={(e) => handleFieldChange('category', e.target.value)}
+                        className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          formErrors.category ? 'border-red-500' : 'border-gray-300'
                         }`}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            const input = e.target as HTMLInputElement;
+                      />
+                      {formErrors.category && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.category}</p>
+                      )}
+                    </div>
+                    
+                    {/* Tags */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tags
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {editingProduct.tags.map((tag) => (
+                          <span 
+                            key={tag} 
+                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800"
+                          >
+                            <Tag size={12} className="mr-1" />
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => handleArrayFieldChange('tags', 'remove', tag)}
+                              className="ml-1 text-purple-600 hover:text-purple-900"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="text"
+                          id="newTag"
+                          placeholder="Add tag"
+                          className="flex-grow px-3 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                              handleArrayFieldChange('tags', 'add', e.currentTarget.value.trim());
+                              e.currentTarget.value = '';
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById('newTag') as HTMLInputElement;
                             if (input.value.trim()) {
                               handleArrayFieldChange('tags', 'add', input.value.trim());
                               input.value = '';
                             }
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          const input = document.getElementById('tagInput') as HTMLInputElement;
-                          if (input.value.trim()) {
-                            handleArrayFieldChange('tags', 'add', input.value.trim());
-                            input.value = '';
-                          }
-                        }}
-                        className="bg-blue-600 text-white px-3 py-2 rounded-r hover:bg-blue-700"
-                      >
-                        <Plus size={16} />
-                      </button>
+                          }}
+                          className="bg-blue-600 text-white px-3 py-2 rounded-r hover:bg-blue-700"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      {formErrors.tags && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.tags}</p>
+                      )}
                     </div>
-                    {formErrors.tags && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.tags}</p>
-                    )}
+                    
+                    {/* Featured */}
+                    <div className="mb-4">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="featured"
+                          checked={editingProduct.featured}
+                          onChange={(e) => handleFieldChange('featured', e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
+                          Featured Product
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <Save size={16} className="mr-1" />
-                      Save Product
-                    </span>
-                  )}
-                </button>
+                
+                {/* Modal Footer */}
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </span>
+                    ) : (
+                      <span className="flex items-center">
+                        <Save size={16} className="mr-1" /> Save
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
+      </div>
+    );
+  }
