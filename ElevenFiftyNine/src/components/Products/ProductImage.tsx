@@ -120,7 +120,7 @@ export const ProductImage = ({
     );
   }
 
-  // Show image when loaded
+  // Show image when loadeded
   return (
     <img
       src={imageSrc || placeholderImage}
