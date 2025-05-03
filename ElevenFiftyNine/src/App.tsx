@@ -1,6 +1,4 @@
 
-import ProductPage from "./pages/ProductPage"
-
 import './index.css'
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import HomePage from "./pages/HomePage"
@@ -11,6 +9,9 @@ import CheckoutPage from "./pages/CheckoutPage"
 import ProductAdminPage from "./pages/admin/ProductAdminPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import { UserManagementPage } from "./pages/UserManagement"
+
+
+import ProductPage from './pages/ProductPage'
 
 function App() {
 
@@ -27,7 +28,7 @@ function App() {
        <Route path="/" element={<HomePage />} />
       <Route path="products" element={<ProductsPage/>} />
       <Route path="/cart" element={<AddToCartPage />} />
-      <Route  path="/product" element={  <ProductPage/>} />
+      <Route  path="/product" element={ <ProductPage/>} />
       <Route  path="/checkout" element={  <CheckoutPage/>} />
 
     </Routes>

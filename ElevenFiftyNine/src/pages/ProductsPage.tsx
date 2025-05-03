@@ -1,58 +1,86 @@
 import { useState, useEffect } from 'react';
-import { Heart, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { Heart, ChevronLeft, ChevronRight, Star, Loader2 } from 'lucide-react';
 import { Footer } from '../components/Footer';
-// Import the JSON data directly or use API fetch
-import productsData from '../context/products.json';
-import type { Product } from '../types/types';
 import { Nav } from '../components/Nav';
-
-
-
+import type { Product } from '../types/types';
+import { ProductApi } from "../context/ProductApi";
+import { ProductImage } from '../components/Products/ProductImage';
+import { useNavigate } from 'react-router';
 
 export default function ProductsPage() {
+
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(0);
+  
+  const productsPerPage = 6;
+
+  useEffect(() => {
+    const userToken = localStorage.getItem('userToken');
+    
+    if (!userToken) {
+      // Redirect to login if no token found
+      navigate('/auth');
+      return;
+    }
+    
+  }, [navigate]);
   
   useEffect(() => {
-    // In a real application, you would fetch from API
-    // For now, we'll simulate loading the data from our JSON file
-    const fetchProducts = async () => {
-      try {
-        // Option 1: If using direct import
-        setProducts(productsData.content);
-        
-        // Option 2: If fetching from an API endpoint
-        // const response = await fetch('/api/products');
-        // const data = await response.json();
-        // setProducts(data.content);
-        
-        // setLoading(false);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        // Use fallback data for demo purposes
-        setProducts([]);
-      }finally {
-        setLoading(false);
-      }
-    };
-    
     fetchProducts();
-  }, []);
+  }, [currentPage, activeTab]);
   
-  // Filter products based on activeTab
-  const filteredProducts = activeTab === 'all' 
-    ? products 
-    : products.filter(product => product.tags && product.tags.includes(activeTab.toLowerCase()));
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Using ProductApi to fetch products with pagination
+      const data = await ProductApi.fetchProducts(
+        currentPage - 1, // Convert to 0-based index for API
+        productsPerPage,
+        activeTab !== 'all' ? activeTab : undefined
+      );
+
+      // Pre-cache images using the ProductApi helper method
+      data.content.forEach(product => {
+        if (product.imageUrl) {
+          console.log("Image ID: ",product.imageUrl)
+          console.log("Image URL raw:", product.imageUrl);
+          console.log("Image URL string:", product.imageUrl?.toString?.());
+
+          ProductApi.preloadImage(product.imageUrl);
+        }
+      });
+      
+      setProducts(data.content);
+      setTotalPages(data.page.totalPages);
+    } catch (err: any) {
+      console.error('Error fetching products:', err);
+      
+      // Handling different error types
+      if (err.message && err.message.includes('401: Unauthorized')) {
+        navigate("/auth")
+        setError('You need to log in to view products. Please sign in.');
+      } else {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      }
+      
+      // Clear products data when there's an error
+      setProducts([]);
+      setTotalPages(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // const imgae = await fetch ("")
   
-  // Calculate pagination
-  const productsPerPage = 6;
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-  
+  // Filter options
   const filters = [
     { id: 'all', name: 'All' },
     { id: 'running', name: 'Running' },
@@ -60,49 +88,86 @@ export default function ProductsPage() {
     { id: 'casual', name: 'Casual' }
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-700">Loading products...</p>
-        </div>
+  const handleAddToWishlist = (productId: string) => {
+    // Implement wishlist functionality
+    console.log(`Added product ${productId} to wishlist`);
+  };
+  
+  const handleProductClick = (productId: string) => {
+    // Navigate to product detail page
+    window.location.href = `/product/${productId}`;
+  };
+
+  // Product card component to keep the main component cleaner
+  const ProductCard = ({ product }: { product: Product }) => (
+    <div 
+      className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
+      onClick={() => handleProductClick(product.id)}
+    >
+      <div className="relative">
+      {/* <img src="http://localhost:8080/api/v1/images/6815dd006232d45a395987d3" /> */}
+        <ProductImage 
+          imageId={product.imageUrl} 
+          alt={product.name} 
+          className="w-full h-64 object-cover"
+        />
+        <button 
+          className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-600 hover:text-red-500 z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToWishlist(product.id);
+          }}
+        >
+          <Heart size={20} />
+        </button>
+        {product.discountPrice && product.price > product.discountPrice && (
+          <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            {Math.round((1 - product.discountPrice / product.price) * 100)}% OFF
+          </div>
+        )}
       </div>
-    );
-  }
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm text-gray-500">{product.brand || 'Brand'}</span>
+          <div className="flex items-center">
+            <Star size={16} className="text-yellow-400 fill-current" />
+            <span className="text-sm text-gray-700 ml-1">
+              {product.averageRating ? product.averageRating.toFixed(1) : '0.0'} 
+              ({product.reviewCount || 0})
+            </span>
+          </div>
+        </div>
+        <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
+        <div className="flex items-center">
+          {product.discountPrice && product.price > product.discountPrice ? (
+            <>
+              <span className="text-red-600 font-medium">${product.discountPrice.toFixed(2)}</span>
+              <span className="text-gray-400 text-sm line-through ml-2">
+                ${product.price.toFixed(2)}
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-900 font-medium">${product.price?.toFixed(2) || '0.00'}</span>
+          )}
+        </div>
+        {product.colors && product.colors.length > 0 && (
+          <div className="mt-3 flex items-center space-x-1">
+            {product.colors.map((color, idx) => (
+              <div 
+                key={idx}
+                className="w-4 h-4 rounded-full border border-gray-300"
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      {/* <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <a href="#" className="text-xl font-bold text-gray-800">ElevenFiftyNine</a>
-          </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-600 hover:text-gray-900">Women</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Men</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Sports</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Brands</a>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-600 hover:text-gray-900">
-              <Search size={20} />
-            </button>
-            <button className="text-gray-600 hover:text-gray-900 relative">
-              <Heart size={20} />
-            </button>
-            <button className="text-gray-600 hover:text-gray-900 relative">
-              <ShoppingCart size={20} />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">2</span>
-            </button>
-            <button className="text-gray-600 hover:text-gray-900">
-              <User size={20} />
-            </button>
-          </div>
-        </div>
-      </header> */}
-
       <Nav />
 
       {/* Hero Banner */}
@@ -134,7 +199,10 @@ export default function ProductsPage() {
                   ? 'bg-black text-white' 
                   : 'bg-white text-gray-800 border border-gray-200'
               }`}
-              onClick={() => setActiveTab(filter.id)}
+              onClick={() => {
+                setActiveTab(filter.id);
+                setCurrentPage(1); // Reset to page 1 when changing filters
+              }}
             >
               {filter.name}
             </button>
@@ -142,64 +210,38 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="container mx-auto px-4 py-2">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+          </div>
+        </div>
+      )}
+
       {/* Products Grid */}
       <div className="container mx-auto px-4 py-6">
-        {currentProducts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-10">
+            <Loader2 size={40} className="animate-spin mx-auto text-gray-500" />
+            <p className="mt-4 text-gray-600">Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-gray-600">No products found in this category.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {currentProducts.map(product => (
-              <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition">
-                <div className="relative">
-                  <img 
-                    src={product.imageUrl || "/api/placeholder/300/300"} 
-                    alt={product.name} 
-                    className="w-full h-64 object-cover"
-                  />
-                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-600 hover:text-red-500">
-                    <Heart size={20} />
-                  </button>
-                </div>
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-500">{product.brand}</span>
-                    <div className="flex items-center">
-                      <Star size={16} className="text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-700 ml-1">
-                        {product.averageRating ? product.averageRating.toFixed(1) : '0.0'} 
-                        ({product.reviewCount || 0})
-                      </span>
-                    </div>
-                  </div>
-                  <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
-                  <div className="flex items-center">
-                    <span className="text-red-600 font-medium">${product.price.toFixed(2)}</span>
-                    {product.discountPrice && (
-                      <span className="text-gray-400 text-sm line-through ml-2">
-                        ${product.discountPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-3 flex items-center space-x-1">
-                    {product.colors && product.colors.map((color, idx) => (
-                      <div 
-                        key={idx}
-                        className="w-4 h-4 rounded-full border border-gray-300"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {/* Pagination - No changes needed for image loading */}
+      {!loading && totalPages > 1 && (
         <div className="container mx-auto px-4 py-6 flex justify-center">
           <div className="flex items-center space-x-2">
             <button 
@@ -214,19 +256,37 @@ export default function ProductsPage() {
               <ChevronLeft size={20} />
             </button>
             
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-              <button
-                key={number}
-                onClick={() => setCurrentPage(number)}
-                className={`w-8 h-8 rounded-full ${
-                  currentPage === number
-                    ? 'bg-black text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {number}
-              </button>
-            ))}
+            {/* Show limited page numbers with ellipsis for better UX */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(num => 
+                num === 1 || 
+                num === totalPages || 
+                (num >= currentPage - 1 && num <= currentPage + 1)
+              )
+              .reduce((acc: (number | string)[], num, idx, arr) => {
+                if (idx > 0 && arr[idx - 1] !== num - 1) {
+                  acc.push('...');
+                }
+                acc.push(num);
+                return acc;
+              }, [])
+              .map((item, index) => 
+                item === '...' ? (
+                  <span key={`ellipsis-${index}`} className="px-2">...</span>
+                ) : (
+                  <button
+                    key={`page-${item}`}
+                    onClick={() => setCurrentPage(item as number)}
+                    className={`w-8 h-8 rounded-full ${
+                      currentPage === item
+                        ? 'bg-black text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
             
             <button 
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
@@ -243,7 +303,6 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Footer */}
       <Footer />
     </div>
   );
