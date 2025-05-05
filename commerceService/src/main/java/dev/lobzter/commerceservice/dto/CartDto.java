@@ -31,8 +31,7 @@ public class CartDto {
         @Min(value = 1, message = "Quantity must be at least 1")
         private int quantity;
 
-        private String color;
-        private String size;
+
     }
 
     @Data
@@ -41,6 +40,7 @@ public class CartDto {
     @NoArgsConstructor
     public static class CartResponse {
         private String id;
+        private String userId;
         private List<CartItemDto> items;
         private BigDecimal subtotal;
         private int itemCount;

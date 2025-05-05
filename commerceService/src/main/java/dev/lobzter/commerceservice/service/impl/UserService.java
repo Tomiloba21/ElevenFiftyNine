@@ -102,6 +102,10 @@ public class UserService {
         return true;
     }
 
+    public  boolean idExists(String id) {
+        return userRepository.existsById(id);
+    }
+
     public boolean resetPassword(String token, String newPassword) {
         Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByTokenAndUsedFalse(token);
 
@@ -130,6 +134,8 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+
 
     public User updateUser(String username, UserDto.UserUpdateRequest updateRequest) {
         User user = userRepository.findByUsername(username)
