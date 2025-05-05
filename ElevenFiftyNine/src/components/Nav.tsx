@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Search, User, Menu, X } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 export const Nav = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Use our cart context to get cart count
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount();
   
   // This is where you would check if user is logged in
   // For example, you might check localStorage or a global state
@@ -18,6 +23,7 @@ export const Nav = () => {
     const user = localStorage.getItem('user');
     setIsLoggedIn(!!user && !!JSON.parse(user).accessToken);
   }, []);
+  
   return (
     <nav className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,9 +58,11 @@ export const Nav = () => {
             </button>
             <Link to="/cart" className="text-gray-600 hover:text-gray-900 p-1 relative">
               <ShoppingCart size={20} />
-              <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                3
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
             </Link>
             {isLoggedIn ? (
               <Link to="/account" className="text-gray-600 hover:text-gray-900 p-1">
@@ -101,9 +109,11 @@ export const Nav = () => {
               </button>
               <Link to="/cart" className="text-gray-600 hover:text-gray-900 p-1 relative">
                 <ShoppingCart size={20} />
-                <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                  3
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
               {isLoggedIn ? (
                 <Link to="/account" className="text-gray-600 hover:text-gray-900 p-1">

@@ -1,96 +1,7 @@
-// import { Star, ShoppingBag, Heart, Truck } from 'lucide-react';
-
-
-
-// export const ProductInfo: React.FC<ProductInfoProps> = ({ 
-//   name, 
-//   price, 
-//   rating, 
-//   reviewCount,
-//   sku
-// }) => {
-//   const fullStars = Math.floor(rating);
-  
-//   return (
-//     <div>
-//       <div className="flex items-center mb-2">
-//         <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
-//           <img src="/api/placeholder/24/24" alt="Reebok logo" className="w-6 h-6" />
-//         </div>
-//         <span className="ml-2 font-medium text-gray-900" >Reebok</span>
-//         <span className="ml-auto text-gray-800 text-sm">{sku}</span>
-//       </div>
-      
-//       <h1 className="text-2xl font-bold mb-2 text-black">{name}</h1>
-      
-//       <div className="flex items-center mb-4">
-//         {[...Array(5)].map((_, i) => (
-//           <Star 
-//             key={i} 
-//             size={18} 
-//             fill={i < fullStars ? "gold" : "none"} 
-//             color={i < fullStars ? "gold" : "gray"} 
-//           />
-//         ))}
-//         <span className="ml-2 text-gray-500 text-sm">{reviewCount} reviews</span>
-//       </div>
-      
-//       <div className="text-3xl font-bold mb-6">${price.toFixed(2)}</div>
-      
-//       <div className="mb-4">
-//         <div className="flex items-center mb-2">
-//           <span className="text-gray-900 mr-2">Color</span>
-//           <span className="font-medium">White</span>
-//         </div>
-        
-//         <div className="flex space-x-2 mb-6">
-//           <div className="w-12 h-12 border-2 border-black rounded-md bg-gray-100"></div>
-//           <div className="w-12 h-12 border border-gray-200 rounded-md bg-gray-200"></div>
-//           <div className="w-12 h-12 border border-gray-200 rounded-md bg-black"></div>
-//         </div>
-        
-//         <div className="flex items-center mb-2">
-//           <span className="text-gray-500 mr-2">Size</span>
-//           <span className="font-medium">EU Men</span>
-//         </div>
-        
-//         <div className="grid grid-cols-6 gap-2 mb-2">
-//           {[40.5, 41, 42, 43, 43.5, 44, 44.5, 45, 46].map((size, index) => (
-//             <button 
-//               key={index} 
-//               className={`py-3 rounded border ${size === 41 ? 'bg-black text-white' : 'border-gray-200 text-amber-400'}`}
-//             >
-//               {size}
-//             </button>
-//           ))}
-//         </div>
-        
-//         <button className="text-gray-400 text-sm mb-6">Size guide</button>
-        
-//         <div className="flex space-x-2 mb-4">
-//           <button className="flex-1 bg-black text-white py-3 rounded-md flex items-center justify-center">
-//             <ShoppingBag size={18} className="mr-2" />
-//             Add to cart
-//           </button>
-//           <button className="w-12 h-12 border border-gray-200 rounded-md flex items-center justify-center">
-//             <Heart size={20} />
-//           </button>
-//         </div>
-        
-//         <div className="flex items-center text-sm">
-//           <Truck size={18} className="mr-2" />
-//           <span>Free delivery on orders over $30.0</span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-
-
 import { useState } from 'react';
-import { Star, Truck, ArrowRight, Heart } from 'lucide-react';
+import { Star, Truck, ArrowRight, Heart, Check } from 'lucide-react';
 import { ProductInfoProps } from '../../types/types';
+import { useCart } from '../../context/CartContext';
 
 // Define the props for the ProductInfo component
 export const ProductInfo = ({
@@ -109,17 +20,32 @@ export const ProductInfo = ({
   const [selectedSize, setSelectedSize] = useState(sizes && sizes.length > 0 ? sizes[0] : '');
   const [selectedColor, setSelectedColor] = useState(colors && colors.length > 0 ? colors[0] : '');
   const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
+  
+  // Use our cart context
+  const { addToCart } = useCart();
 
   // Handle adding to cart
   const handleAddToCart = () => {
-    console.log('Added to cart:', {
+    // Create a product object with the required properties
+    const product = {
+      id: sku || Math.random().toString(36).substr(2, 9), // Use SKU as ID or generate one
       name,
-      price: discountPrice || price,
-      size: selectedSize,
-      color: selectedColor,
-      quantity
-    });
-    // Here you would implement your cart logic
+      price,
+      discountPrice,
+      brand
+    };
+    
+    // Add to cart using our context
+    addToCart(product, quantity, selectedColor, selectedSize);
+    
+    // Show success message
+    setAddedToCart(true);
+    
+    // Reset success message after 3 seconds
+    setTimeout(() => {
+      setAddedToCart(false);
+    }, 3000);
   };
 
   // Handle adding to wishlist
@@ -261,9 +187,15 @@ export const ProductInfo = ({
       <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 mb-6">
         <button
           onClick={handleAddToCart}
-          className="flex-1 bg-black text-white py-3 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+          className="flex-1 bg-black text-white py-3 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black flex items-center justify-center"
         >
-          Add to Cart
+          {addedToCart ? (
+            <>
+              <Check size={20} className="mr-2" /> Added to Cart
+            </>
+          ) : (
+            'Add to Cart'
+          )}
         </button>
         <button
           onClick={handleAddToWishlist}
@@ -302,3 +234,6 @@ export const ProductInfo = ({
     </div>
   );
 };
+
+
+
