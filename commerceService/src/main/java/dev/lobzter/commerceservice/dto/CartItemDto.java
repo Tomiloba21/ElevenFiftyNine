@@ -7,18 +7,18 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class CartItemDto {
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class CartItemDto {
         private String id;
-    private String productId;
-    private int quantity;
-    private BigDecimal price;
+        private String productId;
+        private int quantity;
+        private BigDecimal price;
 
 
-    public BigDecimal getSubtotal() {
-        return price.multiply(BigDecimal.valueOf(quantity));
+        public BigDecimal getSubtotal() {
+            return price.multiply(BigDecimal.valueOf(quantity));
+        }
     }
-}
