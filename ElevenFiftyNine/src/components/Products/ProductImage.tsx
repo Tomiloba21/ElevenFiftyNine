@@ -1,3 +1,5 @@
+
+
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ProductApi } from '../../context/ProductApi';
@@ -28,13 +30,13 @@ export const ProductImage = ({
     setImageError(false);
     setLoading(true);
     setImageSrc(null);
-
+    
     // If no imageId is provided, don't try to load
     if (!imageId) {
       setLoading(false);
       return;
     }
-
+    
     // Validate that imageId is a string
     if (typeof imageId !== 'string') {
       console.error('Invalid imageId type:', typeof imageId, imageId);
@@ -43,14 +45,13 @@ export const ProductImage = ({
       if (onError) onError();
       return;
     }
-
+    
     // Track if component is still mounted
     let isMounted = true;
-
+    
     const loadImage = async () => {
       try {
         console.log(`Loading image with ID: ${imageId}`);
-        
         // Get direct image URL first - this will be used if fetchImage fails
         const directUrl = ProductApi.getImageUrl(imageId);
         
@@ -58,9 +59,7 @@ export const ProductImage = ({
         try {
           // Try to get the image URL using the API with proper authentication
           const imageUrl = await ProductApi.fetchImage(imageId);
-          
           if (!isMounted) return;
-          
           console.log(`Image loaded successfully: ${imageId}`);
           setImageSrc(imageUrl);
           setLoading(false);
@@ -68,7 +67,6 @@ export const ProductImage = ({
         } catch (err) {
           if (!isMounted) return;
           console.warn('Error in fetchImage, falling back to direct URL:', err);
-          
           // Fall back to direct URL if fetchImage fails
           setImageSrc(directUrl);
           setLoading(false);
@@ -81,9 +79,9 @@ export const ProductImage = ({
         if (onError) onError();
       }
     };
-
+    
     loadImage();
-
+    
     // Cleanup function
     return () => {
       isMounted = false;
@@ -120,7 +118,7 @@ export const ProductImage = ({
     );
   }
 
-  // Show image when loadeded
+  // Show image when loaded
   return (
     <img
       src={imageSrc || placeholderImage}

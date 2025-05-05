@@ -15,6 +15,23 @@ export interface Product {
     reviewCount: number;
     averageRating: number;
   }
+
+  export interface ProductType {
+    id: string;
+    name: string;
+    price: number;
+    discountPrice?: number | null | undefined;
+    averageRating?: number;
+    reviewCount?: number;
+    sku?: string;
+    colors?: string[];
+    sizes?: string[];
+    brand?: string;
+    category?: string;
+    description?: string ;
+    imageUrl?: string;
+  }
+  
   
   export interface ProductData {
     content: Product[];
@@ -56,6 +73,21 @@ export interface Product {
     first: boolean;
     numberOfElements: number;
     empty: boolean;
+  }
+  
+
+  export interface ProductInfoProps {
+    name: string;
+    price: number;
+    rating: number;
+    reviewCount: number;
+    discountPrice : number,
+    sku: string;
+    colors : string [],
+    sizes : string [],
+    brand : string,
+    category :string,
+    description : string
   }
   
   export interface ApiResponse<T> {

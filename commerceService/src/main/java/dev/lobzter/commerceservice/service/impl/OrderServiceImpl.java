@@ -120,7 +120,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto.OrderResponse updateOrderStatus(String orderId, OrderDto.OrderStatusUpdateRequest statusUpdateRequest) {
 
         /**
-         * A schedular that lets us change the order service form pending ( joins the queue, then when it converst to procesing , we generate a unique trackingnumber , once it has been delivered by our vendor , it goes to delivered
+         * A schedular that lets us change the order service form pending ( joins the queue, then when it convert to procesing , we generate a unique trackingnumber , once it has been delivered by our vendor , it goes to delivered
          * note => once it has been shipped , it cannot be cancelled or refunded
          */
         Order order = orderRepository.findById(orderId)

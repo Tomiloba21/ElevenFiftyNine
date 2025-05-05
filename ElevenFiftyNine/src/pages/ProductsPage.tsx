@@ -33,6 +33,9 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts();
   }, [currentPage, activeTab]);
+
+
+
   
   const fetchProducts = async () => {
     setLoading(true);
@@ -93,78 +96,78 @@ export default function ProductsPage() {
     console.log(`Added product ${productId} to wishlist`);
   };
   
-  const handleProductClick = (productId: string) => {
-    // Navigate to product detail page
-    window.location.href = `/product/${productId}`;
-  };
+  // const handleProductClick = (productId: string) => {
+  //   // Navigate to product detail page
+  //   window.location.href = `/product/${productId}`;
+  // };
 
   // Product card component to keep the main component cleaner
-  const ProductCard = ({ product }: { product: Product }) => (
-    <div 
-      className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
-      onClick={() => handleProductClick(product.id)}
-    >
-      <div className="relative">
-      {/* <img src="http://localhost:8080/api/v1/images/6815dd006232d45a395987d3" /> */}
-        <ProductImage 
-          imageId={product.imageUrl} 
-          alt={product.name} 
-          className="w-full h-64 object-cover"
-        />
-        <button 
-          className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-600 hover:text-red-500 z-10"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAddToWishlist(product.id);
-          }}
-        >
-          <Heart size={20} />
-        </button>
-        {product.discountPrice && product.price > product.discountPrice && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-            {Math.round((1 - product.discountPrice / product.price) * 100)}% OFF
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-sm text-gray-500">{product.brand || 'Brand'}</span>
-          <div className="flex items-center">
-            <Star size={16} className="text-yellow-400 fill-current" />
-            <span className="text-sm text-gray-700 ml-1">
-              {product.averageRating ? product.averageRating.toFixed(1) : '0.0'} 
-              ({product.reviewCount || 0})
-            </span>
-          </div>
+// Product card component to keep the main component cleaner
+const ProductCard = ({ product, navigate }: { product: Product, navigate: any }) => (
+  <div 
+    className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
+    onClick={() => navigate(`/products/${product.id}`)}
+  >
+    <div className="relative">
+      <ProductImage 
+        imageId={product.imageUrl} 
+        alt={product.name} 
+        className="w-full h-64 object-cover"
+      />
+      <button 
+        className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-600 hover:text-red-500 z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleAddToWishlist(product.id);
+        }}
+      >
+        <Heart size={20} />
+      </button>
+      {product.discountPrice && product.price > product.discountPrice && (
+        <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          {Math.round((1 - product.discountPrice / product.price) * 100)}% OFF
         </div>
-        <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
-        <div className="flex items-center">
-          {product.discountPrice && product.price > product.discountPrice ? (
-            <>
-              <span className="text-red-600 font-medium">${product.discountPrice.toFixed(2)}</span>
-              <span className="text-gray-400 text-sm line-through ml-2">
-                ${product.price.toFixed(2)}
-              </span>
-            </>
-          ) : (
-            <span className="text-gray-900 font-medium">${product.price?.toFixed(2) || '0.00'}</span>
-          )}
-        </div>
-        {product.colors && product.colors.length > 0 && (
-          <div className="mt-3 flex items-center space-x-1">
-            {product.colors.map((color, idx) => (
-              <div 
-                key={idx}
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: color }}
-                title={color}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
-  );
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-sm text-gray-500">{product.brand || 'Brand'}</span>
+        <div className="flex items-center">
+          <Star size={16} className="text-yellow-400 fill-current" />
+          <span className="text-sm text-gray-700 ml-1">
+            {product.averageRating ? product.averageRating.toFixed(1) : '0.0'} 
+            ({product.reviewCount || 0})
+          </span>
+        </div>
+      </div>
+      <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
+      <div className="flex items-center">
+        {product.discountPrice && product.price > product.discountPrice ? (
+          <>
+            <span className="text-red-600 font-medium">${product.discountPrice.toFixed(2)}</span>
+            <span className="text-gray-400 text-sm line-through ml-2">
+              ${product.price.toFixed(2)}
+            </span>
+          </>
+        ) : (
+          <span className="text-gray-900 font-medium">${product.price?.toFixed(2) || '0.00'}</span>
+        )}
+      </div>
+      {product.colors && product.colors.length > 0 && (
+        <div className="mt-3 flex items-center space-x-1">
+          {product.colors.map((color, idx) => (
+            <div 
+              key={idx}
+              className="w-4 h-4 rounded-full border border-gray-300"
+              style={{ backgroundColor: color }}
+              title={color}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -221,24 +224,24 @@ export default function ProductsPage() {
       )}
 
       {/* Products Grid */}
-      <div className="container mx-auto px-4 py-6">
-        {loading ? (
-          <div className="text-center py-10">
-            <Loader2 size={40} className="animate-spin mx-auto text-gray-500" />
-            <p className="mt-4 text-gray-600">Loading products...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-600">No products found in this category.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </div>
+        <div className="container mx-auto px-4 py-6">
+          {loading ? (
+            <div className="text-center py-10">
+              <Loader2 size={40} className="animate-spin mx-auto text-gray-500" />
+              <p className="mt-4 text-gray-600">Loading products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-gray-600">No products found in this category.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {products.map(product => (
+                <ProductCard key={product.id} product={product}  navigate={navigate} />
+              ))}
+            </div>
+          )}
+        </div>
 
       {/* Pagination - No changes needed for image loading */}
       {!loading && totalPages > 1 && (
