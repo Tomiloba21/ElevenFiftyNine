@@ -95,3 +95,33 @@ export interface Product {
     message: string;
     status: number;
   }
+
+export interface CartItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  price: number;
+  name?: string;  // Extended for UI display
+  image?: string; // Extended for UI display
+  brand?: string; // Extended for UI display
+  color?: string; // Extended for UI display
+  size?: string;  // Extended for UI display
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  subtotal: number;
+  itemCount: number;
+}
+
+export interface CartRequest {
+  productId: string;
+  quantity: number;
+}
+
+export interface CartUpdateRequest {
+  itemId: string;
+  quantity: number;
+}

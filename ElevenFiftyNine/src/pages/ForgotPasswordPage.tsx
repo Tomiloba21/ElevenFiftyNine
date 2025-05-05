@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { Nav } from '../components/Nav';
 import AuthService from '../context/Authservice';
 
 export default function ForgotPasswordPage() {
@@ -32,9 +31,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <Nav />
-  
       {/* Main Content */}
       <div className="flex-1 flex py-8">
         <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 w-full">

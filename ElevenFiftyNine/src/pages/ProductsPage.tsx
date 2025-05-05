@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Heart, ChevronLeft, ChevronRight, Star, Loader2 } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { Nav } from '../components/Nav';
 import type { Product } from '../types/types';
 import { ProductApi } from "../context/ProductApi";
 import { ProductImage } from '../components/Products/ProductImage';
@@ -171,8 +170,7 @@ const ProductCard = ({ product, navigate }: { product: Product, navigate: any })
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Nav />
-
+    
       {/* Hero Banner */}
       <div className="bg-gray-100 py-6 md:py-12">
         <div className="container mx-auto px-4 text-center">

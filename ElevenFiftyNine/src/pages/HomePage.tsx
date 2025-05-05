@@ -4,7 +4,7 @@ import redShirt from "../assets/images/redShirt.png";
 import ashShirt from "../assets/images/ashShirt.png";
 import blackShirt from "../assets/images/blackShirt.png";
 import { Footer } from '../components/Footer';
-import { Nav } from '../components/Nav';
+
 import { Link } from 'react-router-dom';
 
 // Type definitions
@@ -53,8 +53,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Navigation */}
-      <Nav />
-
+     
       {/* Hero Section */}
       <header className="pt-20 pb-12 px-4">
         <div className="max-w-7xl mx-auto text-center">

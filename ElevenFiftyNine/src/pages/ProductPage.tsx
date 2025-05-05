@@ -168,7 +168,6 @@ const ProductPage = () => {
 
   return (
     <div className="w-full bg-white">
-      <Nav />
       {/* Main content - full width with white background */}
       <div className="w-full bg-white">
         {/* Content container with responsive padding */}
@@ -196,6 +195,7 @@ const ProductPage = () => {
                 brand={product.brand || 'Unknown Brand'}  // Fallback to 'Unknown Brand' if undefined
                 category={product.category || 'Unknown Category'} // Fallback to 'Unknown Category' if undefined
                 description={product.description || 'No description available'}  // Fallback if undefined
+                productId={product.id}
               />
 
             </div>
