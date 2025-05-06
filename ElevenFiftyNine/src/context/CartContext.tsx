@@ -392,9 +392,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const enhancedItems = await Promise.all(
       items.map(async (item) => {
         try {
+          console.log("Items First ", item.productId)
           const product = await ProductApi.getProduct(item.productId);
           return {
             ...item,
+            id: product.id,
             name: product.name,
             brand: product.brand,
             image: product.imageUrl ? await ProductApi.fetchImage(product.imageUrl) : undefined

@@ -1,9 +1,31 @@
-import { useState } from 'react';
-import { ChevronLeft, CreditCard, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, CreditCard, CheckCircle, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { OrderApi } from '../context/OrderApi';
+import { 
+  Address, 
+  OrderItem, 
+  OrderRequest, 
+  OrderResponse, 
+  PaymentMethod 
+} from '../types/types';
+
+
+
 
 export default function CheckoutPage() {
   // Theme toggle state
   const [isDarkMode] = useState(false);
+  const navigate = useNavigate();
+  
+  // Get cart context
+  const { 
+    cartItems, 
+    loading: cartLoading, 
+    getCartTotal, 
+    clearCart 
+  } = useCart();
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -13,7 +35,7 @@ export default function CheckoutPage() {
     address: '',
     city: '',
     postalCode: '',
-    country: 'United States',
+    country: 'United Kingdom',
     cardName: '',
     cardNumber: '',
     expDate: '',
@@ -21,25 +43,101 @@ export default function CheckoutPage() {
   });
   
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [createdOrder, setCreatedOrder] = useState<OrderResponse | null>(null);
   
-  const handleChange = (e : any) => {
+  // Redirect if cart is empty
+  useEffect(() => {
+    if (!cartLoading && cartItems.length === 0 && step !== 3) {
+      navigate('/cart');
+    }
+  }, [cartItems, cartLoading, navigate, step]);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSubmit = (e : any) => {
+  // Calculate totals
+  const subtotal = getCartTotal();
+  const shipping = subtotal > 50 ? 0 : 5.99;
+  const tax = subtotal * 0.08; // 8% tax rate
+  const total = subtotal + shipping + tax;
+  
+  // Convert cart items to order items
+  const prepareOrderItems = (): OrderItem[] => {
+    
+    
+    const cartItemss = cartItems.map(item => ({
+      productId: item.id,
+      productName: item.name,
+      quantity: item.quantity,
+      unitPrice: item.price,
+      totalPrice: item.price * item.quantity,
+      color: item.color,
+      size: item.size
+    }));
+
+    console.log("Cart Items ", cartItemss);
+    return cartItemss;
+  };
+  
+  // Prepare shipping address
+  const prepareShippingAddress = (): Address => {
+    return {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      addressLine: formData.address,
+      city: formData.city,
+      postalCode: formData.postalCode,
+      country: formData.country,
+      email: formData.email
+    };
+  };
+  
+  // Submit order
+  const submitOrder = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      const orderRequest: OrderRequest = {
+        orderItems: prepareOrderItems(),
+        shippingAddress: prepareShippingAddress(),
+        customerId: userId,
+        paymentMethod: PaymentMethod.CREDIT_CARD, // Hardcoded for now
+      };
+      
+      const order = await OrderApi.createOrder(orderRequest);
+      setCreatedOrder(order);
+      
+      // Clear the cart after successful order
+      await clearCart();
+      
+      // Move to success step
+      setStep(3);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create order');
+      console.error('Order creation failed:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
       setStep(2);
     } else if (step === 2) {
-      setStep(3); // Success step
+      submitOrder();
     }
   };
-  
-  // Theme toggle function
-  // const toggleTheme = () => {
-  //   setIsDarkMode(!isDarkMode);
-  // };
   
   // Define dynamic theme classes
   const bgColor = isDarkMode ? "bg-gray-900" : "bg-white";
@@ -50,43 +148,56 @@ export default function CheckoutPage() {
   const inputBgColor = isDarkMode ? "bg-gray-800" : "bg-white";
   const buttonBgColor = isDarkMode ? "bg-blue-600" : "bg-black";
   
+  // Order summary component
   const orderSummary = (
     <div className={`${secondaryBgColor} p-4 rounded border ${borderColor}`}>
       <h2 className={`text-lg font-semibold mb-4 ${textColor}`}>Order Summary</h2>
-      <div className="flex mb-4">
-        <img src="/api/placeholder/80/80" alt="Product" className="w-20 h-20 object-cover rounded" />
-        <div className="ml-4">
-          <p className={`text-sm ${secondaryTextColor}`}>Reebok</p>
-          <p className={`font-medium ${textColor}`}>11FiftyNine Graphic T-Shirt</p>
-          <p className={`text-sm ${secondaryTextColor}`}>White • Size 42</p>
-          <div className="flex justify-between mt-1">
-            <p className={`text-sm ${secondaryTextColor}`}>Qty: 1</p>
-            <p className={`font-medium ${textColor}`}>$29.99</p>
+      
+      {/* Cart items */}
+      {cartItems.map((item) => (
+        <div key={item.id} className="flex mb-4">
+          {item.image ? (
+            <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
+          ) : (
+            <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center">
+              <span className="text-gray-400">No Image</span>
+            </div>
+          )}
+          <div className="ml-4">
+            <p className={`text-sm ${secondaryTextColor}`}>{item.brand || 'Brand'}</p>
+            <p className={`font-medium ${textColor}`}>{item.name}</p>
+            {item.color && <p className={`text-sm ${secondaryTextColor}`}>{item.color} • {item.size || 'One Size'}</p>}
+            <div className="flex justify-between mt-1">
+              <p className={`text-sm ${secondaryTextColor}`}>Qty: {item.quantity}</p>
+              <p className={`font-medium ${textColor}`}>${(item.price * item.quantity).toFixed(2)}</p>
+            </div>
           </div>
         </div>
-      </div>
+      ))}
       
+      {/* Order totals */}
       <div className={`border-t ${borderColor} pt-4`}>
         <div className="flex justify-between mb-1">
           <p className={textColor}>Subtotal</p>
-          <p className={textColor}>$29.99</p>
+          <p className={textColor}>${subtotal.toFixed(2)}</p>
         </div>
         <div className="flex justify-between mb-1">
           <p className={textColor}>Shipping</p>
-          <p className={textColor}>$5.99</p>
+          <p className={textColor}>${shipping.toFixed(2)}</p>
         </div>
         <div className="flex justify-between mb-1">
           <p className={textColor}>Tax</p>
-          <p className={textColor}>$3.60</p>
+          <p className={textColor}>${tax.toFixed(2)}</p>
         </div>
         <div className={`flex justify-between font-semibold mt-2 pt-2 border-t ${borderColor}`}>
           <p className={textColor}>Total</p>
-          <p className={textColor}>$39.58</p>
+          <p className={textColor}>${total.toFixed(2)}</p>
         </div>
       </div>
     </div>
   );
   
+  // Shipping form
   const renderShippingForm = () => (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
@@ -177,12 +288,17 @@ export default function CheckoutPage() {
         </select>
       </div>
       
-      <button type="submit" className={`w-full ${buttonBgColor} text-white py-3 rounded mt-6`}>
+      <button 
+        type="submit" 
+        className={`w-full ${buttonBgColor} text-white py-3 rounded mt-6`}
+        disabled={isLoading}
+      >
         Continue to Payment
       </button>
     </form>
   );
   
+  // Payment form
   const renderPaymentForm = () => (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
@@ -247,31 +363,56 @@ export default function CheckoutPage() {
         </p>
       </div>
       
-      <button type="submit" className={`w-full ${buttonBgColor} text-white py-3 rounded mt-6`}>
-        Complete Purchase
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
+      )}
+      
+      <button 
+        type="submit" 
+        disabled={isLoading}
+        className={`w-full ${buttonBgColor} text-white py-3 rounded mt-6 flex items-center justify-center`}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 size={18} className="mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          'Complete Purchase'
+        )}
       </button>
     </form>
   );
   
+  // Order success
   const renderSuccess = () => (
     <div className="text-center py-8">
       <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
         <CheckCircle size={32} className="text-green-600" />
       </div>
       <h2 className={`text-2xl font-semibold mb-2 ${textColor}`}>Order Confirmed!</h2>
-      <p className={`${secondaryTextColor} mb-6`}>Your order #11593 has been placed successfully.</p>
+      <p className={`${secondaryTextColor} mb-6`}>
+        Your order #{createdOrder?.orderNumber || 'N/A'} has been placed successfully.
+      </p>
       <p className={`${secondaryTextColor} mb-6`}>We've sent a confirmation email to {formData.email}</p>
       <div className={`${secondaryBgColor} p-4 rounded-lg mb-6 inline-block`}>
         <p className={`font-medium ${textColor}`}>Estimated Delivery</p>
-        <p className={`text-lg ${textColor}`}>April 30 - May 3, 2025</p>
+        <p className={`text-lg ${textColor}`}>May 10 - May 14, 2025</p>
       </div>
       <div>
-        <button className={`${buttonBgColor} text-white px-6 py-2 rounded`}>
-          Track Order
-        </button>
-        <button className={`ml-4 px-6 py-2 border ${borderColor} ${textColor}`}>
-          Continue Shopping
-        </button>
+        <Link to={`/orders/`}>
+          <button className={`${buttonBgColor} text-white px-6 py-2 rounded`}>
+            Track Order
+          </button>
+        </Link>
+        <Link to="/products">
+          <button className={`ml-4 px-6 py-2 border ${borderColor} ${textColor}`}>
+            Continue Shopping
+          </button>
+        </Link>
       </div>
     </div>
   );
@@ -279,13 +420,6 @@ export default function CheckoutPage() {
   return (
     <div className={`${bgColor} ${textColor} min-h-screen`}>
       <div className="max-w-5xl mx-auto p-4">
-        {/* <button 
-          onClick={toggleTheme} 
-          className={`absolute top-4 right-4 px-3 py-1 rounded ${isDarkMode ? "bg-gray-800" : "bg-gray-200"}`}
-        >
-          {isDarkMode ? "Light Mode" : "Dark Mode"}
-        </button> */}
-        
         {step !== 3 && (
           <div className="flex items-center mb-6">
             {step === 2 && (

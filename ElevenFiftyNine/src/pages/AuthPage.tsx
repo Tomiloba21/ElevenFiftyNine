@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Home } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { Nav } from '../components/Nav';
 import AuthService from '../context/Authservice';
 
 export default function AuthPage() {
@@ -72,8 +71,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <Nav />
+
   
       {/* Main Content */}
       <div className="flex-1 flex py-8">

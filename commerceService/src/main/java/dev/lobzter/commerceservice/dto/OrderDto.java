@@ -42,7 +42,7 @@ public class OrderDto {
         @NotNull(message = "Customer ID is required")
         private String customerId;
 
-        private String paymentMethod;
+        private PaymentMethod paymentMethod;
         private String couponCode;
     }
 

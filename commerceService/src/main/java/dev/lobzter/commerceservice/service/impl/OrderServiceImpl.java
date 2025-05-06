@@ -80,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = subtotal.add(taxAmount).add(shippingCost).subtract(discountAmount);
 
         // Set payment method
-        PaymentMethod paymentMethod = PaymentMethod.valueOf(orderRequest.getPaymentMethod().toUpperCase());
+        PaymentMethod paymentMethod = PaymentMethod.valueOf(orderRequest.getPaymentMethod().toString().toUpperCase());
 
         // Create order
         Order order = Order.builder()
@@ -119,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto.OrderResponse updateOrderStatus(String orderId, OrderDto.OrderStatusUpdateRequest statusUpdateRequest) {
 
-        /**
+        /*
          * A schedular that lets us change the order service form pending ( joins the queue, then when it convert to procesing , we generate a unique trackingnumber , once it has been delivered by our vendor , it goes to delivered
          * note => once it has been shipped , it cannot be cancelled or refunded
          */
@@ -214,26 +214,4 @@ public class OrderServiceImpl implements OrderService {
         }
         return BigDecimal.ZERO;
     }
-
-
-//
-//    private OrderDto.OrderResponse mapToDto(Order order){
-//        return OrderDto.OrderResponse.builder()
-//                .id(order.getId())
-//                .orderNumber(order.getOrderNumber())
-//                .status(order.getStatus())
-////                .subtotal()
-//                .shippingCost(order.getShippingCost())
-//                .taxAmount(order.getTaxAmount())
-//                .orderDate(order.getOrderDate())
-//                .orderItems(order.getOrderItems())
-//                .shippingAddress(order.getShippingAddress())
-//                .paymentId(order.getPaymentId())
-//                .paymentMethod(order.getPaymentMethod())
-//                .trackingNumber(order.getTrackingNumber())
-//                .trackingNumber(order.getTrackingNumber())
-//                .shippedDate(order.getShippedDate())
-//                .deliveredDate(order.getDeliveredDate())
-//                .build();
-//    }
 }

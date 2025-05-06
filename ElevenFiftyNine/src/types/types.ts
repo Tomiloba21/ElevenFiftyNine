@@ -125,3 +125,106 @@ export interface CartUpdateRequest {
   itemId: string;
   quantity: number;
 }
+
+
+// 
+
+
+export interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartRequest {
+  productId: string;
+  quantity: number;
+  color?: string;
+  size?: string;
+}
+
+export interface CartUpdateRequest {
+  itemId: string;
+  quantity: number;
+}
+
+// Order Status Enum (matching Java enum)
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED'
+}
+
+// Payment Method Enum
+export enum PaymentMethod {
+  CREDIT_CARD = 'CREDIT_CARD',
+  DEBIT_CARD = 'DEBIT_CARD',
+  PAYPAL = 'PAYPAL',
+  BANK_TRANSFER = 'BANK_TRANSFER'
+}
+
+// Address type 
+export interface Address {
+  firstName: string;
+  lastName: string;
+  addressLine: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  email: string;
+}
+
+// Order Item
+export interface OrderItem {
+  productId?: string;
+  productName?: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  color?: string;
+  size?: string;
+}
+
+// Order Request
+export interface OrderRequest {
+  orderItems: OrderItem[];
+  shippingAddress: Address;
+  customerId: string;
+  paymentMethod: PaymentMethod;
+  couponCode?: string;
+}
+
+// Order Response
+export interface OrderResponse {
+  id: string;
+  orderNumber: string;
+  customerId: string;
+  status: OrderStatus;
+  subtotal: number;
+  shippingCost: number;
+  taxAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  orderDate: string;
+  orderItems: OrderItem[];
+  shippingAddress: Address;
+  paymentId?: string;
+  paymentMethod: PaymentMethod;
+  createdAt ?: string;
+  updatedAt ?: string;
+  trackingNumber?: string;
+  shippedDate?: string;
+  deliveredDate?: string;
+}
+
+// Order Status Update Request
+export interface OrderStatusUpdateRequest {
+  status: OrderStatus;
+  trackingNumber?: string;
+  notes?: string;
+}
