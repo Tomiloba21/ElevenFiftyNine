@@ -29,5 +29,6 @@ public class Swagger {
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")));
+
     }
 }
