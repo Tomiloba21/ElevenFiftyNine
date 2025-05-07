@@ -26,7 +26,7 @@ interface AuthResponse {
 }
 
 interface LoginCredentials {
-  usernameOrEmail: string; // Changed from username to usernameOrEmail
+  usernameOrEmail: string;
   password: string;
 }
 
@@ -43,7 +43,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          usernameOrEmail: username, // Changed key to match API expectation
+          usernameOrEmail: username,
           password
         } as LoginCredentials),
       });
@@ -58,6 +58,13 @@ class AuthService {
       if (data.accessToken) {
         localStorage.setItem('user', JSON.stringify(data));
         localStorage.setItem('userToken', data.accessToken);
+        
+        // Set user role for easy access
+        if (data.roles && data.roles.length > 0) {
+          const isAdmin = data.roles.includes('ROLE_ADMIN');
+          const isCustomer = data.roles.includes('ROLE_CUSTOMER');
+          localStorage.setItem('userRole', isAdmin ? 'admin' : isCustomer ? 'customer' : 'user');
+        }
         
         // Immediately fetch the user data to get the ID
         this.fetchUserDataAfterLogin();
@@ -99,10 +106,19 @@ class AuthService {
     }
   }
 
-  logout(): void {
+  logout(): Promise<void> {
+    // Clear all authentication-related items from localStorage
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
     localStorage.removeItem('userToken');
     localStorage.removeItem('userId');
+    
+    // Add a small delay to ensure localStorage is cleared before any redirects
+    return new Promise<void>(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
   }
 
   async register(userData: RegisterData): Promise<AuthResponse> {

@@ -329,12 +329,7 @@ export default function ProductAdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-800">ElevenFiftyNine Admin</h1>
-        </div>
-      </header>
+    
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">

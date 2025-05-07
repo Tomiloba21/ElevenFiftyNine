@@ -5,9 +5,10 @@ import type { Product } from '../types/types';
 import { ProductApi } from "../context/ProductApi";
 import { ProductImage } from '../components/Products/ProductImage';
 import { useNavigate } from 'react-router';
+import AuthService from '../context/Authservice';
+import AuthSyncService from '../utility/AuthSyncService';
 
 export default function ProductsPage() {
-
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,7 +19,11 @@ export default function ProductsPage() {
   
   const productsPerPage = 6;
 
+  // Ensure auth state is correctly loaded when page mounts
   useEffect(() => {
+    // Refresh auth state and sync across components
+    AuthSyncService.refreshAuthState();
+    
     const userToken = localStorage.getItem('userToken');
     
     if (!userToken) {
@@ -26,15 +31,11 @@ export default function ProductsPage() {
       navigate('/auth');
       return;
     }
-    
   }, [navigate]);
   
   useEffect(() => {
     fetchProducts();
   }, [currentPage, activeTab]);
-
-
-
   
   const fetchProducts = async () => {
     setLoading(true);
@@ -51,10 +52,6 @@ export default function ProductsPage() {
       // Pre-cache images using the ProductApi helper method
       data.content.forEach(product => {
         if (product.imageUrl) {
-          console.log("Image ID: ",product.imageUrl)
-          console.log("Image URL raw:", product.imageUrl);
-          console.log("Image URL string:", product.imageUrl?.toString?.());
-
           ProductApi.preloadImage(product.imageUrl);
         }
       });
@@ -79,8 +76,6 @@ export default function ProductsPage() {
       setLoading(false);
     }
   };
-
-  // const imgae = await fetch ("")
   
   // Filter options
   const filters = [
@@ -94,83 +89,96 @@ export default function ProductsPage() {
     // Implement wishlist functionality
     console.log(`Added product ${productId} to wishlist`);
   };
-  
-  // const handleProductClick = (productId: string) => {
-  //   // Navigate to product detail page
-  //   window.location.href = `/product/${productId}`;
-  // };
 
-  // Product card component to keep the main component cleaner
-// Product card component to keep the main component cleaner
-const ProductCard = ({ product, navigate }: { product: Product, navigate: any }) => (
-  <div 
-    className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
-    onClick={() => navigate(`/products/${product.id}`)}
-  >
-    <div className="relative">
-      <ProductImage 
-        imageId={product.imageUrl} 
-        alt={product.name} 
-        className="w-full h-64 object-cover"
-      />
-      <button 
-        className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-600 hover:text-red-500 z-10"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleAddToWishlist(product.id);
-        }}
+  // Product card component with user role check
+  const ProductCard = ({ product }: { product: Product }) => {
+    // Check if the user is an admin
+    const user = AuthService.getCurrentUser();
+    const isAdmin = user?.roles?.includes('ROLE_ADMIN');
+    
+    const handleCardClick = () => {
+      // Only navigate to product detail if not an admin
+      if (!isAdmin) {
+        navigate(`/products/${product.id}`);
+      } else {
+        console.log("Admins cannot view product details");
+      }
+    };
+    
+    return (
+      <div 
+        className={`bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition ${!isAdmin ? 'cursor-pointer' : ''}`}
+        onClick={handleCardClick}
       >
-        <Heart size={20} />
-      </button>
-      {product.discountPrice && product.price > product.discountPrice && (
-        <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-          {Math.round((1 - product.discountPrice / product.price) * 100)}% OFF
+        <div className="relative">
+          <ProductImage 
+            imageId={product.imageUrl} 
+            alt={product.name} 
+            className="w-full h-64 object-cover"
+          />
+          <button 
+            className="absolute top-3 right-3 bg-white rounded-full p-2 text-gray-600 hover:text-red-500 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddToWishlist(product.id);
+            }}
+          >
+            <Heart size={20} />
+          </button>
+          {product.discountPrice && product.price > product.discountPrice && (
+            <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+              {Math.round((1 - product.discountPrice / product.price) * 100)}% OFF
+            </div>
+          )}
         </div>
-      )}
-    </div>
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm text-gray-500">{product.brand || 'Brand'}</span>
-        <div className="flex items-center">
-          <Star size={16} className="text-yellow-400 fill-current" />
-          <span className="text-sm text-gray-700 ml-1">
-            {product.averageRating ? product.averageRating.toFixed(1) : '0.0'} 
-            ({product.reviewCount || 0})
-          </span>
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm text-gray-500">{product.brand || 'Brand'}</span>
+            <div className="flex items-center">
+              <Star size={16} className="text-yellow-400 fill-current" />
+              <span className="text-sm text-gray-700 ml-1">
+                {product.averageRating ? product.averageRating.toFixed(1) : '0.0'} 
+                ({product.reviewCount || 0})
+              </span>
+            </div>
+          </div>
+          <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
+          <div className="flex items-center">
+            {product.discountPrice && product.price > product.discountPrice ? (
+              <>
+                <span className="text-red-600 font-medium">${product.discountPrice.toFixed(2)}</span>
+                <span className="text-gray-400 text-sm line-through ml-2">
+                  ${product.price.toFixed(2)}
+                </span>
+              </>
+            ) : (
+              <span className="text-gray-900 font-medium">${product.price?.toFixed(2) || '0.00'}</span>
+            )}
+          </div>
+          {product.colors && product.colors.length > 0 && (
+            <div className="mt-3 flex items-center space-x-1">
+              {product.colors.map((color, idx) => (
+                <div 
+                  key={idx}
+                  className="w-4 h-4 rounded-full border border-gray-300"
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
+          )}
+          {isAdmin && (
+            <div className="mt-3 text-xs text-gray-500 italic">
+              Admin view - click disabled
+            </div>
+          )}
         </div>
       </div>
-      <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
-      <div className="flex items-center">
-        {product.discountPrice && product.price > product.discountPrice ? (
-          <>
-            <span className="text-red-600 font-medium">${product.discountPrice.toFixed(2)}</span>
-            <span className="text-gray-400 text-sm line-through ml-2">
-              ${product.price.toFixed(2)}
-            </span>
-          </>
-        ) : (
-          <span className="text-gray-900 font-medium">${product.price?.toFixed(2) || '0.00'}</span>
-        )}
-      </div>
-      {product.colors && product.colors.length > 0 && (
-        <div className="mt-3 flex items-center space-x-1">
-          {product.colors.map((color, idx) => (
-            <div 
-              key={idx}
-              className="w-4 h-4 rounded-full border border-gray-300"
-              style={{ backgroundColor: color }}
-              title={color}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  </div>
-);
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-    
       {/* Hero Banner */}
       <div className="bg-gray-100 py-6 md:py-12">
         <div className="container mx-auto px-4 text-center">
@@ -222,26 +230,26 @@ const ProductCard = ({ product, navigate }: { product: Product, navigate: any })
       )}
 
       {/* Products Grid */}
-        <div className="container mx-auto px-4 py-6">
-          {loading ? (
-            <div className="text-center py-10">
-              <Loader2 size={40} className="animate-spin mx-auto text-gray-500" />
-              <p className="mt-4 text-gray-600">Loading products...</p>
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-gray-600">No products found in this category.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {products.map(product => (
-                <ProductCard key={product.id} product={product}  navigate={navigate} />
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="container mx-auto px-4 py-6">
+        {loading ? (
+          <div className="text-center py-10">
+            <Loader2 size={40} className="animate-spin mx-auto text-gray-500" />
+            <p className="mt-4 text-gray-600">Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-gray-600">No products found in this category.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Pagination - No changes needed for image loading */}
+      {/* Pagination */}
       {!loading && totalPages > 1 && (
         <div className="container mx-auto px-4 py-6 flex justify-center">
           <div className="flex items-center space-x-2">
@@ -257,7 +265,7 @@ const ProductCard = ({ product, navigate }: { product: Product, navigate: any })
               <ChevronLeft size={20} />
             </button>
             
-            {/* Show limited page numbers with ellipsis for better UX */}
+            {/* Pagination numbers */}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter(num => 
                 num === 1 || 

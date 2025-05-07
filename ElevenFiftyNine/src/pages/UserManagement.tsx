@@ -9,6 +9,7 @@ import { WishlistTab } from "../components/user/WishListTab";
 import { SettingsTab } from "../components/user/SettingTab";
 import { ProfileTab } from "../components/user/ProfileTabs";
 import { Sidebar } from "../components/user/Sidebar";
+import AuthService from '../context/Authservice';
 
 export const UserManagementPage: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export const UserManagementPage: React.FC = () => {
     
     if (!userToken) {
       // Redirect to login if no token found
-      navigate('/auth');
+      navigate('/auth', { replace: true });
       return;
     }
     
@@ -87,8 +88,9 @@ export const UserManagementPage: React.FC = () => {
       
       // If error is 401, redirect to login
       if (err instanceof Error && err.message.includes('401')) {
-        localStorage.removeItem('userToken'); // Clear invalid token
-        navigate('/auth');
+        // Clear all auth data
+        AuthService.logout();
+        navigate('/auth', { replace: true });
       }
     } finally {
       setIsLoading(false);
@@ -143,10 +145,14 @@ export const UserManagementPage: React.FC = () => {
     console.log('Removing item from wishlist:', itemId);
   };
 
-  const handleLogout = () => {
-    userApi.logout();
-    // Redirect to login page after logout
-    navigate('/auth');
+  const handleLogout = async () => {
+    try {
+      await AuthService.logout();
+      // Redirect to login page after logout
+      navigate('/auth', { replace: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   if (isLoading) {
