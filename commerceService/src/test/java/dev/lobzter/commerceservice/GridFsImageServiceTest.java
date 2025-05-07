@@ -52,7 +52,7 @@ public class GridFsImageServiceTest {
         when(gridFsTemplate.store(any(), any(), any(), any())).thenReturn(fileId);
 
         // Act
-//        String result = imageService.storeFile(file, productId);
+        String result = String.valueOf(imageService.storeFile(file, productId));
 
         // Assert
 //        assertEquals(fileId.toString(), result);
