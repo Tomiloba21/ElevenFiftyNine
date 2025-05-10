@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import AuthService from '../context/Authservice';
+import AuthService from '../services/Authservice';
 import { useEffect, useState } from 'react';
 
 interface ProtectedRouteProps {

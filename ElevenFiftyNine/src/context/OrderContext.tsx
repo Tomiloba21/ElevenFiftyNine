@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { OrderResponse, OrderStatusUpdateRequest } from '../types/types';
-import { OrderApi } from './OrderApi';
+import { OrderApi } from '../services/OrderApi';
 
 interface OrderContextType {
   orders: OrderResponse[];

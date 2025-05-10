@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+
 @Slf4j
 @RestController
-@RequestMapping("api/v1/admin/discounts")
+@RequestMapping("api/v1/discounts")
 @Tag(name = "AdminDiscount", description = "APIs for Manually seting the discount service")
 @RequiredArgsConstructor
 public class ProductDiscountController {

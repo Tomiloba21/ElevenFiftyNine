@@ -24,6 +24,7 @@ public class ProductDto {
         private int stockQuantity;
         private Set<String> colors;
         private List<String> sizes;
+        private boolean featured;
         private String category;
         private List<String> tags;
         private ObjectId imageUrl;  // Using ObjectId type for consistency

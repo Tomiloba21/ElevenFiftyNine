@@ -72,7 +72,7 @@ public class ProductController {
 
     @Tag(name = "Product")
     @Operation(summary = "Get All Product")
-    @GetMapping("/")
+    @GetMapping("/getAll")
     @ResponseStatus(HttpStatus.OK)
     public Page<ProductDto.ProductResponse> getAllProducts(
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {

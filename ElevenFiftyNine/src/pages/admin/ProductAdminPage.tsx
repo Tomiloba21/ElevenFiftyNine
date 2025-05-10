@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import type { Product } from '../../types/types';
 import { useNavigate } from 'react-router-dom';
-import { ProductApi } from '../../context/ProductApi';
+import { ProductApi } from '../../services/ProductApi';
+import { API_ENDPOINTS } from '../../utility/apiConfig';
   
 export default function ProductAdminPage() {
   // State variables
@@ -30,7 +31,7 @@ export default function ProductAdminPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const API_BASE_URL = 'http://localhost:8080/api/v1/product';
+  // const API_BASE_URL = 'http://localhost:8080/api/v1/product';
 
   // Initial empty product template
   const emptyProduct: Product = {
@@ -208,7 +209,7 @@ export default function ProductAdminPage() {
           formData.append('image', selectedImage);
           
           // Send the request
-          const response = await fetch(`${API_BASE_URL}/${editingProduct.id}`, {
+          const response = await fetch(`${API_ENDPOINTS.PRODUCTS}/${editingProduct.id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: formData
@@ -265,6 +266,7 @@ export default function ProductAdminPage() {
   // Handle field changes
   const handleFieldChange = (field: keyof Product, value: any) => {
     if (!editingProduct) return;
+    
     
     setEditingProduct({
       ...editingProduct,
@@ -951,6 +953,8 @@ export default function ProductAdminPage() {
                         </label>
                       </div>
                     </div>
+
+
                   </div>
                 </div>
                 

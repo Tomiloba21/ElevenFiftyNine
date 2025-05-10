@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Heart, ChevronLeft, ChevronRight, Star, Loader2 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import type { Product } from '../types/types';
-import { ProductApi } from "../context/ProductApi";
+import { ProductApi } from "../services/ProductApi";
 import { ProductImage } from '../components/Products/ProductImage';
 import { useNavigate } from 'react-router';
-import AuthService from '../context/Authservice';
+import AuthService from '../services/Authservice';
 import AuthSyncService from '../utility/AuthSyncService';
 
 export default function ProductsPage() {

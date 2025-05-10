@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { ProductApi } from '../../context/ProductApi';
+import { ProductApi } from '../../services/ProductApi';
 
 interface ProductImageProps {
   imageId: string | null | undefined;

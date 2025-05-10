@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import AuthService from './Authservice';
+import AuthService from '../services/Authservice';
 import AuthSyncService from "../utility/AuthSyncService";
 
 interface Props {
@@ -45,6 +45,7 @@ export default function AuthRedirectHandler({ children }: Props) {
         '/admin',
         '/orders',
         '/checkout',
+        '/discounts',
         '/account'
       ].some(route => location.pathname.startsWith(route));
       

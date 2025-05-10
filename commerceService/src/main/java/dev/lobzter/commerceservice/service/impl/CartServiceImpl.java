@@ -118,7 +118,7 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new CartException("Cart not found for user: " + userId));
 
         Cart.CartItem itemToUpdate = cart.getItems().stream()
-                .filter(item -> item.getId().equals(updateRequest.getItemId()))
+                .filter(item -> item.getProductId().equals(updateRequest.getItemId()))
                 .findFirst()
                 .orElseThrow(() -> new CartException("Item not found in cart: " + updateRequest.getItemId()));
 
@@ -143,7 +143,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new CartException("Cart not found for user: " + userId));
 
-        boolean removed = cart.getItems().removeIf(item -> item.getId().equals(itemId));
+        boolean removed = cart.getItems().removeIf(item -> item.getProductId().equals(itemId));
 
         if (!removed) {
             throw new CartException("Item not found in cart: " + itemId);

@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { TabType, Order, WishlistItem, NotificationPreferences } from '../types/userTypes';
-import { userApi, UserData } from '../context/UserApi';
+import { UserApi,UserData } from '../services/UserApi';
 import { OrdersTab } from "../components/user/OrderTab";
 import { WishlistTab } from "../components/user/WishListTab";
 import { SettingsTab } from "../components/user/SettingTab";
 import { ProfileTab } from "../components/user/ProfileTabs";
 import { Sidebar } from "../components/user/Sidebar";
-import AuthService from '../context/Authservice';
+import AuthService from '../services/Authservice';
 
 export const UserManagementPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export const UserManagementPage: React.FC = () => {
       setError(null);
       
       // Fetch user data with authorization header
-      const user = await userApi.getCurrentUser();
+      const user = await UserApi.getCurrentUser();
       setUserData(user);
       
       // In a real app, you would fetch these from APIs
@@ -101,7 +101,7 @@ export const UserManagementPage: React.FC = () => {
     try {
       if (!userData) return;
       
-      const updatedUser = await userApi.updateUserProfile(updatedData);
+      const updatedUser = await UserApi.updateUserProfile(updatedData);
       setUserData(updatedUser);
       return updatedUser;
     } catch (error) {
@@ -116,7 +116,7 @@ export const UserManagementPage: React.FC = () => {
     confirmPassword: string;
   }) => {
     try {
-      await userApi.updatePassword(passwordData.currentPassword, passwordData.newPassword);
+      await UserApi.updatePassword(passwordData.currentPassword, passwordData.newPassword);
     } catch (error) {
       console.error('Failed to update password:', error);
       throw error;
@@ -125,7 +125,7 @@ export const UserManagementPage: React.FC = () => {
 
   const handleUpdateNotifications = async (preferences: NotificationPreferences) => {
     try {
-      await userApi.updateNotificationPreferences(preferences);
+      await UserApi.updateNotificationPreferences(preferences);
       setNotificationPreferences(preferences);
     } catch (error) {
       console.error('Failed to update notifications:', error);

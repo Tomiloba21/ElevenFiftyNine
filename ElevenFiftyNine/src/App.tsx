@@ -17,7 +17,8 @@ import AdminOrderPage from './pages/admin/AdminOrderPage'
 import AdminOrderStats from './pages/admin/AdminOrderStat'
 import AuthRedirectHandler from './context/AuthRedirectHandler'
 import ProtectedRoute from './context/ProtectedRoute'
-import AuthService from './context/Authservice';
+import AuthService from './services/Authservice';
+import AdminDiscountPage from './pages/admin/AdminDiscountPage'
 
 
 // Component to check if user is admin and redirect if needed
@@ -60,6 +61,7 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
                 <Route path="/admin/product" element={<ProductAdminPage />} />
                 <Route path="/admin/orders" element={<AdminOrderPage />} />
+                <Route path="admin/discounts" element={<AdminDiscountPage />} />
                 <Route path="/orders/:id" element={<AdminOrderStats orders={[]} />} />
               </Route>
               

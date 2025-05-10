@@ -26,6 +26,7 @@ public class ProductServiceImpl implements ProductService {
                 .description(productRequest.getDescription())
                 .price(productRequest.getPrice())
                 .stockQuantity(productRequest.getStockQuantity())
+                .featured(productRequest.isFeatured())
                 .colors(productRequest.getColors())
                 .sizes(productRequest.getSizes())
                 .tags(productRequest.getTags())
@@ -59,6 +60,8 @@ public class ProductServiceImpl implements ProductService {
         if (newProductRequest.getName() != null) {
             existingProduct.setName(newProductRequest.getName());
         }
+        existingProduct.setFeatured(newProductRequest.isFeatured());
+
         if (newProductRequest.getDescription() != null) {
             existingProduct.setDescription(newProductRequest.getDescription());
         }

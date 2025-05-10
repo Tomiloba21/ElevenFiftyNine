@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, CreditCard, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { OrderApi } from '../context/OrderApi';
+import { OrderApi } from '../services/OrderApi';
 import { 
   Address, 
   OrderItem, 

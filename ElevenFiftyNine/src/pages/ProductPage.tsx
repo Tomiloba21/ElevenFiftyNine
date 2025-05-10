@@ -5,7 +5,7 @@ import { ProductInfo } from '../components/Products/ProductInfo';
 import { Reviews } from '../components/Products/Review';
 import { Footer } from '../components/Footer';
 import { Nav } from '../components/Nav';
-import { ProductApi } from '../context/ProductApi';
+import { ProductApi } from '../services/ProductApi';
 import { Loader2 } from 'lucide-react';
 import { ProductType } from '../types/types';
 

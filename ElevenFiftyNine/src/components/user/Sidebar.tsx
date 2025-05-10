@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { User, ShoppingBag, Heart, Settings, LogOut } from 'lucide-react';
-import { UserData } from '../../context/UserApi';
+import { UserData } from '../../services/UserApi';
 import { TabType } from '../../types/userTypes';
 
 interface SidebarProps {

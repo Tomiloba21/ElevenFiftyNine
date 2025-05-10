@@ -1,5 +1,5 @@
 
-import AuthService from '../context/Authservice';
+import AuthService from '../services/Authservice';
 
 class AuthSyncService {
   // Emit auth change event

@@ -191,7 +191,7 @@ export default function CartPage() {
                     <div className="flex justify-between items-center mt-4">
                       <div className={`flex items-center border rounded ${borderColor}`}>
                         <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                           disabled={cartLoading}
                           className={`px-2 py-1 ${secondaryTextColor} ${quantityBgColor} ${cartLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
@@ -199,7 +199,7 @@ export default function CartPage() {
                         </button>
                         <span className={`px-4 ${textColor}`}>{item.quantity}</span>
                         <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                           disabled={cartLoading}
                           className={`px-2 py-1 ${secondaryTextColor} ${quantityBgColor} ${cartLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >

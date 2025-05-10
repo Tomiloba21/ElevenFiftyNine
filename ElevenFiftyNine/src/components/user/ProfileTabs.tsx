@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Clock } from 'lucide-react';
-import { UserData } from '../../context/UserApi';
+import { UserData } from '../../services/UserApi';
 
 interface ProfileTabProps {
   userData: UserData;

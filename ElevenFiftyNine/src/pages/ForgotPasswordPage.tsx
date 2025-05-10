@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import AuthService from '../context/Authservice';
+import AuthService from '../services/Authservice';
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
