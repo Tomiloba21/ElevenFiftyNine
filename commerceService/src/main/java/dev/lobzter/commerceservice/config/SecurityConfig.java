@@ -1,5 +1,5 @@
 package dev.lobzter.commerceservice.config;
-import dev.lobzter.commerceservice.model.User;
+
 import dev.lobzter.commerceservice.service.impl.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,7 +98,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token", "X-User-Id"));
 
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+        configuration.setExposedHeaders(List.of("x-auth-token"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
