@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
   USERS: `${API_BASE_URL}/users`,
   CARTS: `${API_BASE_URL}/carts`,
   PRODUCTS: `${API_BASE_URL}/product`,
-  ORDERS: `${API_BASE_URL}/orders`,
+  ORDERS: `${API_BASE_URL}/orders`, 
   DISCOUNT : `${API_BASE_URL}/discounts`
 };
 
