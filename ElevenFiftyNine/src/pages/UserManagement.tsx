@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { TabType, Order, WishlistItem, NotificationPreferences } from '../types/userTypes';
+import { TabType, NotificationPreferences } from '../types/userTypes';
 import { UserApi,UserData } from '../services/UserApi';
 // import { OrdersTab } from "../components/user/OrderTab";
 // import { WishlistTab } from "../components/user/WishListTab";
