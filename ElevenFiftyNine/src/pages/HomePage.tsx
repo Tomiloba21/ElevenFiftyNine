@@ -144,10 +144,10 @@ const HomePage: React.FC = () => {
                       <p className="text-gray-500 text-sm">{product.brand}</p>
                       <h3 className="font-semibold">{product.name}</h3>
                       <div className="flex items-center space-x-2">
-                        <p className="font-bold">${product.price.toFixed(2)}</p>
+                        <p className="font-bold">£{product.price.toFixed(2)}</p>
                         {product.discountPrice && product.discountPrice > 0 && (
                           <p className="text-sm text-gray-500 line-through">
-                            ${product.discountPrice.toFixed(2)}
+                            £ {product.discountPrice.toFixed(2)}
                           </p>
                         )}
                       </div>

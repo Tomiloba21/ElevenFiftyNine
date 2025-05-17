@@ -428,7 +428,7 @@ export default function ProductAdminPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">${product.price.toFixed(2)}</div>
+                      <div className="text-sm text-gray-900">£ {product.price.toFixed(2)}</div>
                       {product.discountPrice && (
                         <div className="text-sm text-gray-500 line-through">${product.discountPrice.toFixed(2)}</div>
                       )}
@@ -646,7 +646,7 @@ export default function ProductAdminPage() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Price ($)
+                        Price (£)
                       </label>
                       <input
                         type="number"
@@ -665,7 +665,7 @@ export default function ProductAdminPage() {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Discount Price ($)
+                        Discount Price (£)
                       </label>
                       <input
                         type="number"

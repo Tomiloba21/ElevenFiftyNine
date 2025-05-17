@@ -184,10 +184,10 @@ const CustomerOrderTracking: React.FC = () => {
                           {item.quantity}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          ${item.totalPrice?.toFixed(2) || '0.00'}
+                          £{item.totalPrice?.toFixed(2) || '0.00'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          ${(item.quantity * (item.totalPrice || 0)).toFixed(2)}
+                          £{(item.quantity * (item.totalPrice || 0)).toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -203,7 +203,7 @@ const CustomerOrderTracking: React.FC = () => {
             <div className="flex justify-end">
               <div className="text-right">
                 <p className="text-sm text-slate-500">Total</p>
-                <p className="text-lg font-medium text-slate-900">${currentOrder.totalAmount?.toFixed(2) || '0.00'}</p>
+                <p className="text-lg font-medium text-slate-900">£{currentOrder.totalAmount?.toFixed(2) || '0.00'}</p>
               </div>
             </div>
           </div>
@@ -263,7 +263,7 @@ const CustomerOrderTracking: React.FC = () => {
                       </div>
                       <div className="mt-1 text-sm text-slate-500">
                         <p>Placed on: {order.createdAt ? formatDate(order.createdAt) : 'N/A'}</p>
-                        <p className="mt-1">${order.totalAmount?.toFixed(2) || '0.00'} • {order.orderItems?.length || 0} items</p>
+                        <p className="mt-1">£{order.totalAmount?.toFixed(2) || '0.00'} • {order.orderItems?.length || 0} items</p>
                       </div>
                     </div>
                   </div>

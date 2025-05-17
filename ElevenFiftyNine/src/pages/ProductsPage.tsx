@@ -146,13 +146,13 @@ export default function ProductsPage() {
           <div className="flex items-center">
             {product.discountPrice && product.price > product.discountPrice ? (
               <>
-                <span className="text-red-600 font-medium">${product.discountPrice.toFixed(2)}</span>
+                <span className="text-red-600 font-medium">£{product.discountPrice.toFixed(2)}</span>
                 <span className="text-gray-400 text-sm line-through ml-2">
-                  ${product.price.toFixed(2)}
+                  £{product.price.toFixed(2)}
                 </span>
               </>
             ) : (
-              <span className="text-gray-900 font-medium">${product.price?.toFixed(2) || '0.00'}</span>
+              <span className="text-gray-900 font-medium">£{product.price?.toFixed(2) || '0.00'}</span>
             )}
           </div>
           {product.colors && product.colors.length > 0 && (

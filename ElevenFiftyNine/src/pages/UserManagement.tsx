@@ -4,19 +4,20 @@ import { useNavigate } from 'react-router-dom';
 
 import { TabType, Order, WishlistItem, NotificationPreferences } from '../types/userTypes';
 import { UserApi,UserData } from '../services/UserApi';
-import { OrdersTab } from "../components/user/OrderTab";
-import { WishlistTab } from "../components/user/WishListTab";
+// import { OrdersTab } from "../components/user/OrderTab";
+// import { WishlistTab } from "../components/user/WishListTab";
 import { SettingsTab } from "../components/user/SettingTab";
 import { ProfileTab } from "../components/user/ProfileTabs";
 import { Sidebar } from "../components/user/Sidebar";
 import AuthService from '../services/Authservice';
+import CustomerOrderTracking from './CustomOrderTracking';
 
 export const UserManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  // const [orders, setOrders] = useState<Order[]>([]);
+  // const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>({
     orderUpdates: true,
     promotions: true,
@@ -48,39 +49,39 @@ export const UserManagementPage: React.FC = () => {
       const user = await UserApi.getCurrentUser();
       setUserData(user);
       
-      // In a real app, you would fetch these from APIs
-      // Mock data for demonstration
-      setOrders([
-        {
-          id: '1',
-          orderNumber: 'ORD-12345',
-          date: '2023-05-15',
-          amount: 125.99,
-          status: 'Delivered'
-        },
-        {
-          id: '2',
-          orderNumber: 'ORD-12346',
-          date: '2023-06-20',
-          amount: 89.50,
-          status: 'Shipped'
-        }
-      ]);
+      // //  fetch these from APIs
+      // // Mock data for demonstration
+      // setOrders([
+      //   {
+      //     id: '1',
+      //     orderNumber: 'ORD-12345',
+      //     date: '2023-05-15',
+      //     amount: 125.99,
+      //     status: 'Delivered'
+      //   },
+      //   {
+      //     id: '2',
+      //     orderNumber: 'ORD-12346',
+      //     date: '2023-06-20',
+      //     amount: 89.50,
+      //     status: 'Shipped'
+      //   }
+      // ]);
       
-      setWishlist([
-        {
-          id: '1',
-          name: 'Premium Headphones',
-          price: 199.99,
-          imageUrl: 'https://example.com/headphones.jpg'
-        },
-        {
-          id: '2',
-          name: 'Wireless Keyboard',
-          price: 59.99,
-          imageUrl: 'https://example.com/keyboard.jpg'
-        }
-      ]);
+      // setWishlist([
+      //   {
+      //     id: '1',
+      //     name: 'Premium Headphones',
+      //     price: 199.99,
+      //     imageUrl: 'https://example.com/headphones.jpg'
+      //   },
+      //   {
+      //     id: '2',
+      //     name: 'Wireless Keyboard',
+      //     price: 59.99,
+      //     imageUrl: 'https://example.com/keyboard.jpg'
+      //   }
+      // ]);
       
     } catch (err) {
       console.error('Failed to fetch user data:', err);
@@ -133,17 +134,17 @@ export const UserManagementPage: React.FC = () => {
     }
   };
 
-  const handleAddToCart = (itemId: string) => {
-    // In a real app, this would call an API to add to cart
-    console.log('Adding item to cart:', itemId);
-    alert(`Item ${itemId} added to cart!`);
-  };
+  // const handleAddToCart = (itemId: string) => {
+  //   // In a real app, this would call an API to add to cart
+  //   console.log('Adding item to cart:', itemId);
+  //   alert(`Item ${itemId} added to cart!`);
+  // };
 
-  const handleRemoveFromWishlist = (itemId: string) => {
-    // In a real app, this would call an API to remove from wishlist
-    setWishlist(wishlist.filter(item => item.id !== itemId));
-    console.log('Removing item from wishlist:', itemId);
-  };
+  // const handleRemoveFromWishlist = (itemId: string) => {
+  //   // In a real app, this would call an API to remove from wishlist
+  //   setWishlist(wishlist.filter(item => item.id !== itemId));
+  //   console.log('Removing item from wishlist:', itemId);
+  // };
 
   const handleLogout = async () => {
     try {
@@ -209,16 +210,17 @@ export const UserManagementPage: React.FC = () => {
             )}
             
             {activeTab === 'orders' && (
-              <OrdersTab orders={orders} />
+              // <OrdersTab orders={orders} />
+              <CustomerOrderTracking />
             )}
             
-            {activeTab === 'wishlist' && (
+            {/* {activeTab === 'wishlist' && (
               <WishlistTab 
                 items={wishlist}
                 onAddToCart={handleAddToCart}
                 onRemoveFromWishlist={handleRemoveFromWishlist}
               />
-            )}
+            )} */}
             
             {activeTab === 'settings' && (
               <SettingsTab 

@@ -185,7 +185,7 @@ export default function CartPage() {
                         {item.color && <p className={`text-sm mt-1 ${secondaryTextColor}`}>Color: {item.color}</p>}
                         {item.size && <p className={`text-sm ${secondaryTextColor}`}>Size: {item.size}</p>}
                       </div>
-                      <p className={`font-semibold ${textColor}`}>${item.price.toFixed(2)}</p>
+                      <p className={`font-semibold ${textColor}`}>£{item.price.toFixed(2)}</p>
                     </div>
                     
                     <div className="flex justify-between items-center mt-4">
@@ -223,19 +223,19 @@ export default function CartPage() {
               <h2 className={`text-xl font-semibold mb-4 ${textColor}`}>Order Summary</h2>
               <div className="flex justify-between mb-2">
                 <p className={textColor}>Subtotal</p>
-                <p className={textColor}>${subtotal.toFixed(2)}</p>
+                <p className={textColor}>£{subtotal.toFixed(2)}</p>
               </div>
               <div className="flex justify-between mb-2">
                 <p className={textColor}>Shipping</p>
-                <p className={textColor}>${shipping.toFixed(2)}</p>
+                <p className={textColor}>£{shipping.toFixed(2)}</p>
               </div>
               <div className="flex justify-between mb-2">
                 <p className={textColor}>Tax</p>
-                <p className={textColor}>${tax.toFixed(2)}</p>
+                <p className={textColor}>£{tax.toFixed(2)}</p>
               </div>
               <div className={`border-t ${borderColor} mt-4 pt-4 flex justify-between font-semibold`}>
                 <p className={textColor}>Total</p>
-                <p className={textColor}>${total.toFixed(2)}</p>
+                <p className={textColor}>£{total.toFixed(2)}</p>
               </div>
               
               <button
@@ -264,7 +264,7 @@ export default function CartPage() {
                 </p>
               ) : (
                 <p className={`text-center mt-4 text-sm ${secondaryTextColor}`}>
-                  Free shipping on orders over $50
+                  Free shipping on orders over £50
                 </p>
               )}
             </div>

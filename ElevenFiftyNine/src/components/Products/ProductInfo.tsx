@@ -88,14 +88,14 @@ export const ProductInfo = ({
       <div className="mt-2 flex items-center">
         {discountPrice && discountPrice < price ? (
           <>
-            <p className="text-xl font-semibold text-gray-900">${discountPrice.toFixed(2)}</p>
-            <p className="ml-2 text-lg text-gray-500 line-through">${price.toFixed(2)}</p>
+            <p className="text-xl font-semibold text-gray-900">£{discountPrice.toFixed(2)}</p>
+            <p className="ml-2 text-lg text-gray-500 line-through">£{price.toFixed(2)}</p>
             <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
               {Math.round(((price - discountPrice) / price) * 100)}% OFF
             </span>
           </>
         ) : (
-          <p className="text-xl font-semibold text-gray-900">${price.toFixed(2)}</p>
+          <p className="text-xl font-semibold text-gray-900">£{price.toFixed(2)}</p>
         )}
       </div>
       

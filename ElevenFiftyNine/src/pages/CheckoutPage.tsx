@@ -169,7 +169,7 @@ export default function CheckoutPage() {
             {item.color && <p className={`text-sm ${secondaryTextColor}`}>{item.color} • {item.size || 'One Size'}</p>}
             <div className="flex justify-between mt-1">
               <p className={`text-sm ${secondaryTextColor}`}>Qty: {item.quantity}</p>
-              <p className={`font-medium ${textColor}`}>${(item.price * item.quantity).toFixed(2)}</p>
+              <p className={`font-medium ${textColor}`}>£{(item.price * item.quantity).toFixed(2)}</p>
             </div>
           </div>
         </div>
@@ -179,19 +179,19 @@ export default function CheckoutPage() {
       <div className={`border-t ${borderColor} pt-4`}>
         <div className="flex justify-between mb-1">
           <p className={textColor}>Subtotal</p>
-          <p className={textColor}>${subtotal.toFixed(2)}</p>
+          <p className={textColor}>£{subtotal.toFixed(2)}</p>
         </div>
         <div className="flex justify-between mb-1">
           <p className={textColor}>Shipping</p>
-          <p className={textColor}>${shipping.toFixed(2)}</p>
+          <p className={textColor}>£{shipping.toFixed(2)}</p>
         </div>
         <div className="flex justify-between mb-1">
           <p className={textColor}>Tax</p>
-          <p className={textColor}>${tax.toFixed(2)}</p>
+          <p className={textColor}>£{tax.toFixed(2)}</p>
         </div>
         <div className={`flex justify-between font-semibold mt-2 pt-2 border-t ${borderColor}`}>
           <p className={textColor}>Total</p>
-          <p className={textColor}>${total.toFixed(2)}</p>
+          <p className={textColor}>£{total.toFixed(2)}</p>
         </div>
       </div>
     </div>
